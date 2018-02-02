@@ -1,0 +1,74 @@
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+p{
+  color: rgb(255, 0, 0);
+}
+
+b{
+  font-size: 14px;
+}
+
+label{
+
+   font-size: 13px;
+
+}
+
+.titleTable{
+  font-size: 16px;
+}
+
+.tableModal thead th{
+  vertical-align: bottom;
+  border-bottom: 2px solid #dee2e6;
+  background-color: darkslateblue;
+  color: white;
+}
+
+#btnDarkBlue{
+  color: #ffffff;
+  background-color: darkslateblue;
+  background-image: none;
+  border-color: darkslateblue;
+
+}
+
+.btnDarkBlue{
+  color: #ffffff;
+  background-color: darkslateblue;
+  background-image: none;
+  border-color: darkslateblue;
+
+}
+
+.fontTitle{
+  font-family:'Philosopher', sans-serif;
+}
+
+.hiddeElement{
+  display: none;
+}
+
+#motivoRechazo{
+  color: red;
+}
+
+/*Style modal confirm*/
+
+.modal .modal-header {
+  border-bottom: none;
+  position: relative;
+}
+.modal .modal-header .btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin-top: 0;
+  border-top-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+

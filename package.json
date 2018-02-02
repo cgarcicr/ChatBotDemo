@@ -1,0 +1,27 @@
+{
+  "name": "chatbot",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "body-parser": "~1.18.2",
+    "botbuilder": "^3.8.4",
+    "cookie-parser": "~1.4.3",
+    "debug": "~2.6.9",
+    "dotenv": "^2.0.0",
+    "ejs": "~2.5.7",
+    "express": "~4.15.5",
+    "mongodb": "^2.2.33",
+    "morgan": "~1.9.0",
+    "nodemailer": "^4.4.1",
+    "osa-imessage": "^2.1.1",
+    "restify": "^5.2.1",
+    "serve-favicon": "~2.4.5",
+    "watson-developer-cloud": "^2.31.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.14.11"
+  }
+}

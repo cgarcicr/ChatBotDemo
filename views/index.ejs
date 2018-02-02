@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+          rel="stylesheet"
+          integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
+          crossorigin="anonymous">
+
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link href="https://fonts.googleapis.com/css?family=Philosopher" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="/javascripts/cambioIndMoneda.js"></script>
+  </head>
+  <body >
+
+    <h1 class="fontTitle">Lista de solicitudes</h1><br>
+
+    <% if(solicitud.length>0){%>
+
+    <!-- Tabla con el listado de solicitudes  -->
+    <table class="table table-striped tableModal table-sm"  >
+      <thead >
+        <th>Fecha Solicitud</th>
+        <th>Nombre Cliente</th>
+        <th>Apellido Cliente</th>
+        <th>Nro Cuenta</th>
+        <th>Estado de Solicitud</th>
+        <th>Opciones</th>
+
+
+      </thead>
+        <% for(var i=0; i<solicitud.length; i++) {%>
+
+          <tr>
+            <td><%= solicitud[i].FechaSolicitud %></td>
+            <td><%= solicitud[i].datosUsuario.nombres %></td>
+            <td><%= solicitud[i].datosUsuario.apellidos %></td>
+            <td><%= solicitud[i].datosCreditoActual.nro_cuenta %></td>
+            <td><%= solicitud[i].Estado %></td>
+            <td>
+              <%if(solicitud[i].Estado == "Rechazado"){%>
+              <button onclick="imprimir(this)" id="btnDarkBlue2"
+                      data-sol="<%=JSON.stringify(solicitud[i])%>"
+                      type="button" class="btn btn-outline-default"
+
+                      data-toggle="modal" data-target="#myModal">
+                Ver Detalles
+              </button>
+              <%}else{%>
+              <button onclick="imprimir(this)" id="btnDarkBlue"
+                      data-sol="<%=JSON.stringify(solicitud[i])%>"
+                      type="button" class="btn btn-outline-primary"
+
+                      data-toggle="modal" data-target="#myModal">
+                Ver Detalles
+              </button>
+              <%}%>
+              </td>
+
+          </tr>
+        <% } %>
+      </table>
+      <%} else {%>
+      <p class="alert alert-warning">No hay solicitudes</p>
+      <% } %>
+
+
+    <!-- Modal de confirmación para el rechazo de solicitudes  -->
+    <!-- The Modal -->
+    <div class="modal fade" id="myModal">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title">Detalles de Solicitud</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+
+          <!-- Modal body -->
+          <div class="modal-body">
+
+
+            <div class="container-fluid">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="row">
+                    <div class="col-md-6">
+
+                      <b>Nombre Cliente: </b><label id="pos2"></label></br>
+                      <b>Nro Cédula: </b><label id="pos3"></label></br>
+                      <b>Nro Cuenta: </b><label id="pos4"></label></br>
+                     </div>
+
+                    <div class="col-md-6">
+                      <b>Tipo de Solicitud: </b><label id="pos1"></label></br>
+                      <b>Tipo Crédito: </b><label id="pos5"></label></br>
+                      <b>Valor Total deuda: </b><label id="pos6"></label></br>
+                    </div>
+
+                  </div>
+                  <b id="labelMotivoRechazo">Motivo de rechazo: </b><label  id="motivoRechazo"></label>
+                  <table class="table table-sm tableModal" border="1px">
+                    <thead>
+                    <tr>
+                      <th>
+
+                      </th>
+                      <th>
+                        Valores Actuales
+                      </th>
+                      <th>
+                        Valores Solicitados
+                      </th>
+
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                      <td>
+                        <b class="titleTable">Valor de la cuota</b>
+                      </td>
+                      <td>
+                        <label id="pos7"></label>
+                      </td>
+                      <td>
+                        <label id="pos8"></label>
+                      </td>
+
+                    </tr>
+                    <tr class="active">
+                      <td>
+                       <b class="titleTable">Nro cuotas mensuales</b>
+                      </td>
+                      <td>
+                        <label id="pos9"></label>
+                      </td>
+                      <td>
+                        <label id="pos10"></label>
+                      </td>
+
+                    </tr>
+
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Modal footer -->
+
+          <div class="modal-footer">
+
+            <div class="botonesAcciones">
+
+              <!--Btn ACEPTAR -->
+              <button type="button" class="btn" id="btnDarkBlue" data-toggle="modal" data-target="#modalConfSolicitud">
+                <i class="fa fa-check" aria-hidden="true"></i>
+                Aceptar
+              </button>
+
+              <!--Btn RECHAZAR -->
+              <button data-toggle="modal" data-target="#modalConfirmacion" type="button" class="btn btn-outline-default" >
+                <i class="fa fa-times" aria-hidden="true"></i>
+                Rechazar
+              </button>
+
+            </div>
+
+          </div>
+
+
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Modal de confirmación para el rechazo de solicitudes  -->
+    <!-- The Modal -->
+    <div class="modal fade" id="modalConfirmacion">
+      <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title">Confirmación</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+
+          <!-- Modal body -->
+          <div class="modal-body">
+            <label>Escribe el motivo del rechazo</label>
+            <form method="post" action="/save">
+
+              <div class="form-group">
+                  <textarea name="motivo" class="form-control" id="motivo" rows="3" required></textarea>
+              </div>
+                  <input type="hidden" id="id_solicitud" name="id_solicitud">
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-default" onclick="function a() {location.reload();}" id="btnDarkBlue">Confirmar</button>
+              </div>
+
+
+          </form>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <!--Modal para confirmar la solicitud -->
+    <div class="container">
+      <div class="row">
+
+
+        <div id="modalConfSolicitud" class="modal fade in">
+          <div class="modal-dialog">
+            <div class="modal-content">
+
+              <div class="modal-header">
+                <a class="btn btn-default" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span></a>
+                <h4 class="modal-title">Confirmación</h4>
+              </div>
+              <div class="modal-body">
+                <p>Si confirma esta acción se realizaran las afectaciones solicitadas en la cuenta del usuario</p>
+                <b>¿Estas seguro?</b>
+              </div>
+              <div class="modal-footer">
+
+                  <button class="btn btn-default" data-dismiss="modal">No </button>
+
+                  <form action="/confirm" method="post">
+                    <input type="hidden" name="solicitudB" id="id_solicitudAceptada">
+                    <button type="submit" class="btn btnDarkBlue" >Si </button>
+                  </form>
+
+
+              </div>
+
+            </div><!-- /.modal-content -->
+          </div><!-- /.modal-dalog -->
+        </div><!-- /.modal -->
+
+
+
+
+
+      </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <script >
+      //Funcion activada desde el boton "ver detalles" que habilita la modal
+      //se encarda de llevar los datos recibidos desde el controller (index.js) a la ventana modal de detalles
+      //@val : objeto con los datos de la fila que activa la acción
+      function imprimir(val) {
+        var data= val.getAttribute("data-sol");
+        data=JSON.parse(data);
+        console.log('DATA ',data)
+        $("#pos1").text(data.tipoAcuerdo);
+        $("#pos2").text(data.datosUsuario.nombres);
+        $("#pos3").text(data.datosUsuario.cedula);
+        $("#pos4").text(data.datosCreditoActual.nro_cuenta);
+        $("#pos5").text(data.datosCreditoActual.tipo_credito);
+        $("#pos6").text(cambioIndividual(data.datosCreditoActual.valor_deuda));
+        $("#pos7").text(cambioIndividual(data.datosCreditoActual.valor_cuota));
+        $("#pos8").text(cambioIndividual(data.nuevaCuota));
+        $("#pos9").text(data.datosCreditoActual.nro_cuotas);
+        $("#pos10").text(data.nuevoNroCuotas);
+        $("#id_solicitud").val(data._id);
+        $("#id_solicitudAceptada").val(data._id);
+        $("#motivoRechazo").text(data.motivoRechazo)
+      }
+      //Script para remover elementos de la ventana modal (Cuando boton de "ver detalles" sea por rechazo)
+        $("#btnDarkBlue2").click(()=> {
+        $(".botonesAcciones").addClass( "hiddeElement" )
+        $("#motivoRechazo").removeClass("hiddeElement")
+        $("#labelMotivoRechazo").removeClass("hiddeElement")
+
+      })
+
+      //Script para añadir elementos de la ventana modal (Cuando boton de "ver detalles" sea por solicitud)
+      $("#btnDarkBlue").click(()=> {
+        $(".botonesAcciones").removeClass( "hiddeElement" )//remueve la clase que oculta los botones de acciones en la modal
+        $("#motivoRechazo").addClass("hiddeElement")//añade la clase que oculta la información del motivo de rechazo en la modal
+        $("#labelMotivoRechazo").addClass("hiddeElement")
+      })
+
+
+    </script>
+
+  </body>
+
+</html>
