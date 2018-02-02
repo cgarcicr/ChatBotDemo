@@ -84,24 +84,12 @@ payload.context = conversationContext.watsonContext;
 
 conversation.message(payload, function(err, response) {
 
-  //Fecha Actual
-  var hoy = new Date();
-  var dd = hoy.getDate();
-  var mm = hoy.getMonth()+1; //hoy es 0!
-  var yyyy = hoy.getFullYear();
-
-  if(dd<10) {dd='0'+dd}
-  if(mm<10) {mm='0'+mm}
-  hoy = mm+'/'+dd+'/'+yyyy;
-  session.userData.fechaActual = hoy
-
-
-
   if (err) {
     session.send(err);
   } else {
     session.send(response.output.text);
     conversationContext.watsonContext = response.context;
+    console.log('-------',JSON.stringify(response.context));
 
     if (response.output.action === "buscarCedula") {
         let documento={cedula:response.context.nroCedula};
@@ -111,14 +99,22 @@ conversation.message(payload, function(err, response) {
                 if(result.length===0){
                     session.send("El número de documento que me indicó no aparece en el sistema, verifica e ingresa de nuevo.");
                     conversationContext.watsonContext=nodo.nodo_credito;
-                }else{
-                    //session.send(`Correcto Sr(a) ${session.userData.datosUsuario.nombres}. \n\nEstas son las opciones disponibles de tu crédito.\n\n-Consultar saldo.\n\n-Solicitar Renegociación.\n\n¿Que opción deseas.?`);
-                    //conversationContext.watsonContext=nodo.nodo_saldo;
-                    let opcion1='\n\n-Solicitar saldo.';
-                    let opcion2='\n\n-Solicitar renegociación.';
-                    session.send(`Correcto sr(a) ${session.userData.datosUsuario.nombres}, estas son las opciones disponibles para tu crédito:%s%s\n\n¿Cuál deseas?.`,opcion1,opcion2);
+                }else{                                     
+                    //let opcion1='\n\n-Solicitar saldo.';
+                    //let opcion2='\n\n-Solicitar renegociación.';
+                    var msg = new builder.Message(session);
+                    //msg.attachmentLayout(builder.AttachmentLayout.carousel)
+                    msg.attachments([
+                        new builder.HeroCard(session)
+                        //.title(`Saldo`)
+                        //.subtitle(`Consulta de saldo`)                        
+                        .text(`Correcto sr(a) ${session.userData.datosUsuario.nombres}, estas son las opciones disponibles para tu crédito:\n\n`)                                               
+                        .buttons([builder.CardAction.imBack(session, "deseas ver el saldo", "Solicitar saldo"),
+                                  builder.CardAction.imBack(session, "deseas renegociar", "Solicitar renegociación")]
+                        )                     
+                     ]);
+                    session.send(msg);                   
                     conversationContext.watsonContext=response.context;
-
                 }
 
         });
@@ -140,7 +136,7 @@ conversation.message(payload, function(err, response) {
         }
         );
 
-    }else if(response.output.action==="solicitarRenegociacion"){
+    }else if(response.output.action==="solicitarRenegociacion"){    
         let infoUsuario=session.userData.datosUsuario;
         let documento={cliente_id:infoUsuario.cedula};
         connect.buscarCreditoxCedula(documento,result=>{
@@ -164,7 +160,7 @@ conversation.message(payload, function(err, response) {
         let infoUsuario=session.userData.datosUsuario;
         let documento={cliente_id:infoUsuario.cedula};
         connect.buscarCreditoxCedula(documento,result=>{
-
+         
             if(result.nro_cuotas<=36){
                 result.nro_cuotas=48;
                 result.valor_cuota=Math.round(result.valor_deuda/result.nro_cuotas);
@@ -185,12 +181,9 @@ conversation.message(payload, function(err, response) {
         let documento={cliente_id:infoUsuario.cedula};
         connect.buscarCreditoxCedula(documento,result=>{
 
-            if(capacidadPago!=null){
+            if(capacidadPago>0){
                 result.valor_cuota=capacidadPago;
                 result.nro_cuotas=Math.round(result.valor_deuda/result.valor_cuota);
-
-            }
-
             session.send(`Según su capacidad de pago las nuevas condiciones del crédito son:
             \n\nValor de la cuota: ${moneda.cambioMoneda(result.valor_cuota)}
             \n\nNúmero de cuotas: ${result.nro_cuotas} cuotas mensuales.
@@ -199,6 +192,13 @@ conversation.message(payload, function(err, response) {
             session.userData.nuevoValorCuota=result.valor_cuota;
             response.context.nombreUsuario=infoUsuario.nombres;
             conversationContext.watsonContext=response.context;
+            }else{
+                session.send(`La capacidad de pago debe ser una suma mayor a cero, vuelva a ingresarla.`);
+                conversationContext.watsonContext=nodo.nodo_acuerdoCapacidadPago;
+                //conversationContext.watsonContext=response.context;
+            }
+
+            
         });
 
 
@@ -209,13 +209,10 @@ conversation.message(payload, function(err, response) {
         let documento={cliente_id:infoUsuario.cedula};
         connect.buscarCreditoxCedula(documento,result=>{
 
-            if(nroCuotas!=null){
+            if(nroCuotas>0){
                 result.nro_cuotas=nroCuotas;
                 result.valor_cuota=Math.round(result.valor_deuda/result.nro_cuotas);
-
-            }
-
-            session.send(`Con este número de cuotas las nuevas condiciones del crédito son:
+                session.send(`Con este número de cuotas las nuevas condiciones del crédito son:
             \n\nValor de la cuota: ${moneda.cambioMoneda(result.valor_cuota)}
             \n\nNúmero de cuotas: ${result.nro_cuotas} cuotas mensuales.
             \n\n¿Estas de acuerdo?`);
@@ -223,6 +220,13 @@ conversation.message(payload, function(err, response) {
             session.userData.nuevoValorCuota=result.valor_cuota;
             response.context.nombreUsuario=infoUsuario.nombres;
             conversationContext.watsonContext=response.context;
+
+            }else{
+                session.send(`El número de cuotas debe ser mayor a cero, vuelva a ingresarlo.`);
+                conversationContext.watsonContext=nodo.nodo_acuerdoCapacidadCuotas;
+            }
+
+            
         });
 
 
@@ -242,36 +246,36 @@ conversation.message(payload, function(err, response) {
 
     }else if(response.output.action==="correoAcuerdoBanco"){
 
-           let contenido=`Sr(a) ${session.userData.datosUsuario.nombres}.
-           \nReciba un cordial saludo,
-           \nPara mí fue un placer haber atendido su requerimiento, referente al número de crédito ${session.userData.datosCreditoUsario.nro_cuenta}.\nSegún la conversación previa se llegó a un nuevo acuerdo de pago con las siguientes condiciones:
-           \nValor de la cuota: ${moneda.cambioMoneda(session.userData.nuevoValorCuota)}\nNúmero de cuotas: ${session.userData.nuevoNroCuotas} cuotas mensuales\n\nEsta información será previamente analizada por uno de nuestros asesores que se contactará con usted para oficializar el nuevo acuerdo.
-           \n\nAtentamente,
-           \nBANWERC\nAsesor virtual.
-           `;
-           let correo= session.userData.datosUsuario.email;
+        let contenido=`Sr(a) ${session.userData.datosUsuario.nombres}.
+        \nReciba un cordial saludo,
+        \nPara mí fue un placer haber atendido su requerimiento, referente al número de crédito ${session.userData.datosCreditoUsario.nro_cuenta}.\nSegún la conversación previa se llegó a un nuevo acuerdo de pago con las siguientes condiciones:
+        \nValor de la cuota: ${moneda.cambioMoneda(session.userData.nuevoValorCuota)}\nNúmero de cuotas: ${session.userData.nuevoNroCuotas} cuotas mensuales\n\nEsta información será previamente analizada por uno de nuestros asesores que se contactará con usted para oficializar el nuevo acuerdo.
+        \n\nAtentamente,
+        \nBANWERC\nAsesor virtual.
+        `;
+        let correo= session.userData.datosUsuario.email;
 
-           let asunto=`Solicitud acuerdo de pago`;
+        let asunto=`Solicitud acuerdo de pago`;
 
-           //llamamos el metodo para enviar email pasando como parametro correoElectronico,asunto y cuerpo de correo
-           email.enviarEmail(correo,asunto,contenido);
+        //llamamos el metodo para enviar email pasando como parametro correoElectronico,asunto y cuerpo de correo
+        email.enviarEmail(correo,asunto,contenido);
 
-           //Guardamos el objeto con los datos de la solicitud
-           let datosSolicitud= {
-               "datosUsuario": session.userData.datosUsuario,
-               "datosCreditoActual": session.userData.datosCreditoUsario,
-               "nuevaCuota":session.userData.nuevoValorCuota,
-               "nuevoNroCuotas":session.userData.nuevoNroCuotas,
-               "tipoAcuerdo":"Acuerdo Banco",
-               "Estado":"Solicitada",
-               "motivoRechazo":"",
-               "FechaSolicitud":session.userData.fechaActual
-           }
+        //Guardamos el objeto con los datos de la solicitud
+        let datosSolicitud= {
+            "datosUsuario": session.userData.datosUsuario,
+            "datosCreditoActual": session.userData.datosCreditoUsario,
+            "nuevaCuota":session.userData.nuevoValorCuota,
+            "nuevoNroCuotas":session.userData.nuevoNroCuotas,
+            "tipoAcuerdo":"Acuerdo Banco",
+            "Estado":"Solicitada",
+            "motivoRechazo":"",
+            "FechaSolicitud":session.userData.fechaActual
+        }
 
-           //llamamos el metodo para insertar la informacion del usuario, credito y el nuevo acuerdo
-           connect.insertarSolicitud(datosSolicitud)
+        //llamamos el metodo para insertar la informacion del usuario, credito y el nuevo acuerdo
+        connect.insertarSolicitud(datosSolicitud)
 
-    }
+ }
     //Envio de correo al terminar la consulta del saldo
     else if(response.output.action=="correoInfoSaldo"){
 
@@ -282,7 +286,7 @@ conversation.message(payload, function(err, response) {
 
              let contenido = `Sr(a) ${session.userData.datosUsuario.nombres}.
              \nReciba un cordial saludo,
-             \nSegún la consulta realizada en nuestro portal referente al número de crédito ${session.userData.datosCreditoUsuario.nro_cuenta},\nrelaciono detalles de tu saldo actual y el estado del crédito :
+             \nSegún la consulta realizada en nuestro portal referente al número de crédito ${session.userData.datosCreditoUsario.nro_cuenta},\nrelaciono detalles de tu saldo actual y el estado del crédito :
              \nTipo de crédito : ${session.userData.datosCreditoUsario.tipo_credito}\nCupo inicial : ${moneda.cambioMoneda(session.userData.datosCreditoUsario.cupo_total)}\nSaldo pendiente : ${moneda.cambioMoneda(session.userData.datosCreditoUsario.valor_deuda)}\nNúmero de cuotas : ${session.userData.datosCreditoUsario.nro_cuotas} mensuales\nValor de la cuota : ${moneda.cambioMoneda(session.userData.datosCreditoUsario.valor_cuota)}\nTasa Efectiva anual : ${session.userData.datosCreditoUsario.tasa}\nCrédito en mora : ${(session.userData.datosCreditoUsario.mora=='y')?'Si':'No'}
              \nRecuerda que puedes consultar tu información en cualquier momento y visitar las opciones que tenemos disponibles para ti.
              \n\nAtentamente,
@@ -348,6 +352,11 @@ conversation.message(payload, function(err, response) {
  });
 
 });
+
+// Add dialog to return list of shirts available
+
+
+
 /*------------------------------------------------------------------------ */
 
 //Funciones requeridas por express
