@@ -82,6 +82,18 @@ if (!conversationContext) conversationContext = {};
 payload.context = conversationContext.watsonContext;
 
 
+//Fecha Actual
+  var hoy = new Date();
+  var dd = hoy.getDate();
+  var mm = hoy.getMonth()+1; //hoy es 0!
+  var yyyy = hoy.getFullYear();
+
+  if(dd<10) {dd='0'+dd}
+  if(mm<10) {mm='0'+mm}
+  hoy = mm+'/'+dd+'/'+yyyy;
+  session.userData.fechaActual = hoy
+
+
 conversation.message(payload, function(err, response) {
 
   if (err) {
@@ -99,7 +111,7 @@ conversation.message(payload, function(err, response) {
                 if(result.length===0){
                     session.send("El número de documento que me indicó no aparece en el sistema, verifica e ingresa de nuevo.");
                     conversationContext.watsonContext=nodo.nodo_credito;
-                }else{                                     
+                }else{
                     //let opcion1='\n\n-Solicitar saldo.';
                     //let opcion2='\n\n-Solicitar renegociación.';
                     var msg = new builder.Message(session);
@@ -107,13 +119,13 @@ conversation.message(payload, function(err, response) {
                     msg.attachments([
                         new builder.HeroCard(session)
                         //.title(`Saldo`)
-                        //.subtitle(`Consulta de saldo`)                        
-                        .text(`Correcto sr(a) ${session.userData.datosUsuario.nombres}, estas son las opciones disponibles para tu crédito:\n\n`)                                               
+                        //.subtitle(`Consulta de saldo`)
+                        .text(`Correcto sr(a) ${session.userData.datosUsuario.nombres}, estas son las opciones disponibles para tu crédito:\n\n`)
                         .buttons([builder.CardAction.imBack(session, "deseas ver el saldo", "Solicitar saldo"),
                                   builder.CardAction.imBack(session, "deseas renegociar", "Solicitar renegociación")]
-                        )                     
+                        )
                      ]);
-                    session.send(msg);                   
+                    session.send(msg);
                     conversationContext.watsonContext=response.context;
                 }
 
@@ -136,7 +148,7 @@ conversation.message(payload, function(err, response) {
         }
         );
 
-    }else if(response.output.action==="solicitarRenegociacion"){    
+    }else if(response.output.action==="solicitarRenegociacion"){
         let infoUsuario=session.userData.datosUsuario;
         let documento={cliente_id:infoUsuario.cedula};
         connect.buscarCreditoxCedula(documento,result=>{
@@ -160,7 +172,7 @@ conversation.message(payload, function(err, response) {
         let infoUsuario=session.userData.datosUsuario;
         let documento={cliente_id:infoUsuario.cedula};
         connect.buscarCreditoxCedula(documento,result=>{
-         
+
             if(result.nro_cuotas<=36){
                 result.nro_cuotas=48;
                 result.valor_cuota=Math.round(result.valor_deuda/result.nro_cuotas);
@@ -198,7 +210,7 @@ conversation.message(payload, function(err, response) {
                 //conversationContext.watsonContext=response.context;
             }
 
-            
+
         });
 
 
@@ -226,7 +238,7 @@ conversation.message(payload, function(err, response) {
                 conversationContext.watsonContext=nodo.nodo_acuerdoCapacidadCuotas;
             }
 
-            
+
         });
 
 
@@ -248,7 +260,7 @@ conversation.message(payload, function(err, response) {
 
         let contenido=`Sr(a) ${session.userData.datosUsuario.nombres}.
         \nReciba un cordial saludo,
-        \nPara mí fue un placer haber atendido su requerimiento, referente al número de crédito ${session.userData.datosCreditoUsario.nro_cuenta}.\nSegún la conversación previa se llegó a un nuevo acuerdo de pago con las siguientes condiciones:
+        \nPara mí fue un placer haber atendido su requerimiento, referente al número de crédito ${session.userData.datosCreditoUsuario.nro_cuenta}.\nSegún la conversación previa se llegó a un nuevo acuerdo de pago con las siguientes condiciones:
         \nValor de la cuota: ${moneda.cambioMoneda(session.userData.nuevoValorCuota)}\nNúmero de cuotas: ${session.userData.nuevoNroCuotas} cuotas mensuales\n\nEsta información será previamente analizada por uno de nuestros asesores que se contactará con usted para oficializar el nuevo acuerdo.
         \n\nAtentamente,
         \nBANWERC\nAsesor virtual.
@@ -263,7 +275,7 @@ conversation.message(payload, function(err, response) {
         //Guardamos el objeto con los datos de la solicitud
         let datosSolicitud= {
             "datosUsuario": session.userData.datosUsuario,
-            "datosCreditoActual": session.userData.datosCreditoUsario,
+            "datosCreditoActual": session.userData.datosCreditoUsuario,
             "nuevaCuota":session.userData.nuevoValorCuota,
             "nuevoNroCuotas":session.userData.nuevoNroCuotas,
             "tipoAcuerdo":"Acuerdo Banco",

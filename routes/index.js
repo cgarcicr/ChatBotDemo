@@ -51,7 +51,17 @@ router.post('/save', function(req, res, next) {
 router.post('/confirm',(req,res,next)=>{
 
    connect.buscarSolicitud(req.body.solicitudB, result => {
-     console.log('El result ', result)
+     let cuentaId = result.datosCreditoActual._id;
+     let nuevaCuota = result.nuevaCuota;
+     let nuevoNroCuotas = result.nuevoNroCuotas;
+     let nuevosValores = {$set:{"nro_cuotas": nuevoNroCuotas, "valor_cuota":nuevaCuota}};
+     let aceptado = {$set:{"Estado": "Aceptado"}};
+
+     connect.actualizarCreditoUsuario(cuentaId,nuevosValores);
+
+     connect.actualizarSolicitud(req.body.solicitudB,aceptado);
+
+
    });
 
 
