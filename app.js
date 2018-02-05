@@ -150,27 +150,17 @@ conversation.message(payload, function(err, response) {
                     //let opcion2='\n\n-Solicitar renegociación.';
                     var msg = new builder.Message(session);
                     //msg.attachmentLayout(builder.AttachmentLayout.carousel)
-                    
                     msg.attachments([
                         new builder.HeroCard(session)
-<<<<<<< HEAD
-                        .title(`Señor sr(a) ${session.userData.datosUsuario.nombres}`)                                                
+                        .title(`Señor sr(b) ${session.userData.datosUsuario.nombres}`)                                                
                         .text(`Estas son las opciones disponibles para tu crédito:`)                                                                       
                         .buttons([builder.CardAction.imBack(session, "solicitar estado del crédito", "Solicitar estado del crédito"),
                                   builder.CardAction.imBack(session, "solicitar renegociación","Solicitar renegociación")                                  
                                 ]
-                        )                     
-=======
-                        //.title(`Saldo`)
-                        //.subtitle(`Consulta de saldo`)
-                        .text(`Correcto sr(a) ${session.userData.datosUsuario.nombres}, estas son las opciones disponibles para tu crédito:\n\n`)
-                        .buttons([builder.CardAction.imBack(session, "deseas ver el saldo", "Solicitar saldo"),
-                                  builder.CardAction.imBack(session, "deseas renegociar", "Solicitar renegociación")]
-                        )
->>>>>>> a3e1256d48a2741b88ab48f03f8ee3d4c45eba4f
-                     ]);
+                       )                     
+                      ]);
                     session.send(msg);
-                    conversationContext.watsonContext=response.context;
+                    conversationContext.watsonContext=response.context;                    
                 }
 
         });
