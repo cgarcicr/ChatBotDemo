@@ -117,13 +117,13 @@ insertarSolicitud:function(objeto){
 
 },
   //Metodo para actualizar la solicitud cuando hay rechazo
-  actualizarSolicitudRechazo:function(objeto1,objeto2){
+  actualizarSolicitud:function(id,objeto2){
     MongoClient.connect(url, function(err, db) {
       if (err) throw err;
 
-      db.collection('solicitudes').updateOne({"_id":objectId(objeto1)},objeto2,function(err, result) {
+      db.collection('solicitudes').updateOne({"_id":objectId(id)},objeto2,function(err, result) {
         if (err) throw err;
-        console.log('Registro Actualizado')
+        console.log('Solicitud Actualizada')
         db.close();
       });
     });
@@ -132,13 +132,13 @@ insertarSolicitud:function(objeto){
 
 
   //Metodo para actualizar el credito del usuario cuando es aceptada por un asesor bancario
-  actualizarCreditoUsuario:function(idCCredito,newValues) {
+  actualizarCreditoUsuario:function(idCredito,newValues) {
     MongoClient.connect(url, function (err, db) {
       if (err) throw err;
 
-      db.collection('creditos').updateOne({"_id": objectId(idCCredito)}, newValues, function (err, result) {
+      db.collection('creditos').updateOne({"_id": objectId(idCredito)}, newValues, function (err, result) {
         if (err) throw err;
-        console.log('Registro Actualizado')
+        console.log('Crédito Actualizado')
         db.close();
       });
     });

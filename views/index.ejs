@@ -42,10 +42,10 @@
             <td><%= solicitud[i].datosCreditoActual.nro_cuenta %></td>
             <td><%= solicitud[i].Estado %></td>
             <td>
-              <%if(solicitud[i].Estado == "Rechazado"){%>
+              <%if(solicitud[i].Estado == "Rechazado" || solicitud[i].Estado == "Aceptado" ){%>
               <button onclick="imprimir(this)" id="btnDarkBlue2"
                       data-sol="<%=JSON.stringify(solicitud[i])%>"
-                      type="button" class="btn btn-outline-default"
+                      type="button" class="btn btn-outline-default btnDarkBlue2"
 
                       data-toggle="modal" data-target="#myModal">
                 Ver Detalles
@@ -254,33 +254,8 @@
     </div>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     <script >
+
       //Funcion activada desde el boton "ver detalles" que habilita la modal
       //se encarda de llevar los datos recibidos desde el controller (index.js) a la ventana modal de detalles
       //@val : objeto con los datos de la fila que activa la acción
@@ -303,7 +278,7 @@
         $("#motivoRechazo").text(data.motivoRechazo)
       }
       //Script para remover elementos de la ventana modal (Cuando boton de "ver detalles" sea por rechazo)
-        $("#btnDarkBlue2").click(()=> {
+        $(".btnDarkBlue2").click(()=> {
         $(".botonesAcciones").addClass( "hiddeElement" )
         $("#motivoRechazo").removeClass("hiddeElement")
         $("#labelMotivoRechazo").removeClass("hiddeElement")
