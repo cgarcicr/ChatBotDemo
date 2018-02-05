@@ -82,6 +82,9 @@ if (!conversationContext) conversationContext = {};
 payload.context = conversationContext.watsonContext;
 
 
+  connect.obtenerProximaSequencia("productid");
+
+
 //Fecha Actual
   var hoy = new Date();
   var dd = hoy.getDate();
@@ -274,6 +277,7 @@ conversation.message(payload, function(err, response) {
 
         //Guardamos el objeto con los datos de la solicitud
         let datosSolicitud= {
+
             "datosUsuario": session.userData.datosUsuario,
             "datosCreditoActual": session.userData.datosCreditoUsuario,
             "nuevaCuota":session.userData.nuevoValorCuota,
