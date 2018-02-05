@@ -106,7 +106,41 @@ conversation.message(payload, function(err, response) {
     conversationContext.watsonContext = response.context;
     console.log('-------',JSON.stringify(response.context));
 
-    if (response.output.action === "buscarCedula") {
+    if(response.output.action==="saludar"){
+        //session.send("En que te puedo ayudar hoy?");
+        var msg = new builder.Message(session);
+        msg.addAttachment({
+            contentType: "application/vnd.microsoft.card.adaptive",
+            content: {
+                type: "AdaptiveCard",                    
+                   body: [
+                        {
+                            "type": "TextBlock",
+                            "text": "¡Hola soy tu asesor virtual !.",
+                            "size": "large",
+                            "weight": "bolder",
+
+                        },  
+                            {
+                                "type": "TextBlock",
+                                "text": "¿En que te puedo ayudar hoy?"
+                            }
+                    ],
+                    "actions": [
+                        {
+                            "type": "Action.Submit",
+                            "title": "Información de tu crédito",
+                            "data": "credito"
+                        }
+                  ]
+            }
+        });
+                 
+        session.send(msg);                   
+        conversationContext.watsonContext=response.context;  
+
+    }
+    else if (response.output.action === "buscarCedula") {
         let documento={cedula:response.context.nroCedula};
         connect.buscarxCedula(documento,result=>{
                 session.userData.datosUsuario=result;
@@ -121,15 +155,16 @@ conversation.message(payload, function(err, response) {
                     //msg.attachmentLayout(builder.AttachmentLayout.carousel)
                     msg.attachments([
                         new builder.HeroCard(session)
-                        //.title(`Saldo`)
-                        //.subtitle(`Consulta de saldo`)
-                        .text(`Correcto sr(a) ${session.userData.datosUsuario.nombres}, estas son las opciones disponibles para tu crédito:\n\n`)
-                        .buttons([builder.CardAction.imBack(session, "deseas ver el saldo", "Solicitar saldo"),
-                                  builder.CardAction.imBack(session, "deseas renegociar", "Solicitar renegociación")]
-                        )
-                     ]);
+
+                        .title(`Señor sr(a) ${session.userData.datosUsuario.nombres}`)                                                
+                        .text(`Estas son las opciones disponibles para tu crédito:`)                                                                       
+                        .buttons([builder.CardAction.imBack(session, "solicitar estado del crédito", "Solicitar estado del crédito"),
+                                  builder.CardAction.imBack(session, "solicitar renegociación","Solicitar renegociación")                                  
+                                ]
+                       )                     
+                      ]);
                     session.send(msg);
-                    conversationContext.watsonContext=response.context;
+                    conversationContext.watsonContext=response.context;                    
                 }
 
         });
@@ -138,7 +173,7 @@ conversation.message(payload, function(err, response) {
         let documento={cliente_id:infoUsuario.cedula};
             connect.buscarCreditoxCedula(documento,result=>{
             session.userData.datosCreditoUsuario=result;
-            session.send(`Sr(a) %s La información para el número de credito %s es:
+            /*session.send(`Sr(a) %s La información para el número de credito %s es:
             \n\nTipo de crédito: %s
             \n\nCupo inicial: %s
             \n\nSaldo pendiente: %s
@@ -147,7 +182,83 @@ conversation.message(payload, function(err, response) {
             \n\nCrédito en mora: %s
             \n\n Esta información será enviada a su correo electrónico.
             \n\n¿Desea ver las opciones de renegociación?`,
-            infoUsuario.nombres,result.nro_cuenta,result.tipo_credito,moneda.cambioMoneda(result.cupo_total),moneda.cambioMoneda(result.valor_deuda),result.nro_cuotas,moneda.cambioMoneda(result.valor_cuota),(result.mora)=='y'?'Si':'No');
+            infoUsuario.nombres,result.nro_cuenta,result.tipo_credito,moneda.cambioMoneda(result.cupo_total),moneda.cambioMoneda(result.valor_deuda),result.nro_cuotas,moneda.cambioMoneda(result.valor_cuota),(result.mora)=='y'?'Si':'No');*/
+            
+            var msg = new builder.Message(session);
+            msg.addAttachment({
+                contentType: "application/vnd.microsoft.card.adaptive",
+                content: {
+                    type: "AdaptiveCard",                    
+                       body: [
+                            {
+                                "type": "TextBlock",
+                                "text": "ESTADO CRÉDITO",
+                                "size": "large",
+                                "weight": "bolder",
+
+                            },
+                            {
+                                "type": "FactSet",
+                                "facts": [
+                                    {
+                                        "title": "Número de crédito:",
+                                        "value": `${result.nro_cuenta}`
+                                    },
+                                    {
+                                        "title": "Tipo de crédito:",
+                                        "value": `${result.tipo_credito}`
+                                    },
+                                    {
+                                        "title": "Cupo inicial:",
+                                        "value": `${moneda.cambioMoneda(result.cupo_total)}`
+                                    },
+                                    {
+                                        "title": "Saldo pendiente:",
+                                        "value": `${moneda.cambioMoneda(result.valor_deuda)}`
+                                    },
+                                    {
+                                        "title": "Número de cuotas:",
+                                        "value": `${result.nro_cuotas}`
+                                    },
+                                    {
+                                        "title": "Valor de la cuota:",
+                                        "value": `${moneda.cambioMoneda(result.valor_cuota)}`
+                                    },
+                                    {
+                                        "title": "Crédito en mora:",
+                                        "value": `${(result.mora)=='y'?'Si':'No'}`
+                                    },
+                                    
+                                ]
+                            },
+                            {
+                                "type": "TextBlock",
+                                "text": "¿Desea ver las opciones de renegociación?"
+                            }                           
+                         
+
+
+                        ],
+                        "actions": [
+                            {
+                                "type": "Action.Submit",
+			                    "title": "Si",
+			                    "data": "si"
+                            },
+                            {
+                                "type": "Action.Submit",
+			                    "title": "No",
+			                    "data": "no"
+                            },
+
+                      ]
+                }
+            });
+                     
+            session.send(msg);                   
+            conversationContext.watsonContext=response.context;   
+
+
         }
         );
 
@@ -155,7 +266,7 @@ conversation.message(payload, function(err, response) {
         let infoUsuario=session.userData.datosUsuario;
         let documento={cliente_id:infoUsuario.cedula};
         connect.buscarCreditoxCedula(documento,result=>{
-            session.send(`Sr(a) %s La información para el número de credito %s es:
+            /*session.send(`Sr(a) %s La información para el número de credito %s es:
             \n\nTipo de crédito: %s
             \n\nCupo inicial: %s
             \n\nSaldo pendiente: %s
@@ -167,7 +278,86 @@ conversation.message(payload, function(err, response) {
             \n\n-Ver acuerdos propuestos por el banco.
             \n\n-Indicar una capacidad de pago.
             \n\n-Indicar un número de cuotas.`);
+            session.userData.datosCreditoUsario=result;*/
+            var msg = new builder.Message(session);
+            msg.addAttachment({
+                contentType: "application/vnd.microsoft.card.adaptive",
+                content: {
+                    type: "AdaptiveCard",                    
+                       body: [
+                            {
+                                "type": "TextBlock",
+                                "text": "ESTADO CRÉDITO",
+                                "size": "large",
+                                "weight": "bolder",
+
+                            },
+                            {
+                                "type": "FactSet",
+                                "facts": [
+                                    {
+                                        "title": "Número de crédito:",
+                                        "value": `${result.nro_cuenta}`
+                                    },
+                                    {
+                                        "title": "Tipo de crédito:",
+                                        "value": `${result.tipo_credito}`
+                                    },
+                                    {
+                                        "title": "Cupo inicial:",
+                                        "value": `${moneda.cambioMoneda(result.cupo_total)}`
+                                    },
+                                    {
+                                        "title": "Saldo pendiente:",
+                                        "value": `${moneda.cambioMoneda(result.valor_deuda)}`
+                                    },
+                                    {
+                                        "title": "Número de cuotas:",
+                                        "value": `${result.nro_cuotas}`
+                                    },
+                                    {
+                                        "title": "Valor de la cuota:",
+                                        "value": `${moneda.cambioMoneda(result.valor_cuota)}`
+                                    },
+                                    {
+                                        "title": "Crédito en mora:",
+                                        "value": `${(result.mora)=='y'?'Si':'No'}`
+                                    },
+                                    
+                                ]
+                            },
+                            {
+                                "type": "TextBlock",
+                                "text": "¿Que opción desea para renegociar?"
+                            }                           
+                         
+
+
+                        ],
+                        "actions": [
+                            {
+                                "type": "Action.Submit",
+			                    "title": "Ver acuerdos propuestos por el banco",
+			                    "data": "Ver acuerdos propuestos por el banco"
+                            },
+                            {
+                                "type": "Action.Submit",
+			                    "title": "Indicar una capacidad de pago",
+			                    "data": "Indicar una capacidad de pago"
+                            },
+                            {
+                                "type": "Action.Submit",
+			                    "title": "Indicar un número de cuotas",
+			                    "data": "Indicar un número de cuotas"
+                            }
+                      ]
+                }
+            });
             session.userData.datosCreditoUsario=result;
+            session.send(msg);                   
+            conversationContext.watsonContext=response.context; 
+
+
         });
 
 
@@ -181,12 +371,29 @@ conversation.message(payload, function(err, response) {
                 result.valor_cuota=Math.round(result.valor_deuda/result.nro_cuotas);
             }
 
-            session.send(`El banco ofrece como alternativa pagar un valor de ${moneda.cambioMoneda(result.valor_cuota)} por ${result.nro_cuotas} cuotas mensuales.
-            \n\n¿Estas de acuerdo?`);
+            /*session.send(`El banco ofrece como alternativa pagar un valor de ${moneda.cambioMoneda(result.valor_cuota)} por ${result.nro_cuotas} cuotas mensuales.
+            \n\n¿Está de acuerdo?`);
             session.userData.nuevoNroCuotas=result.nro_cuotas;
             session.userData.nuevoValorCuota=result.valor_cuota;
             response.context.nombreUsuario=infoUsuario.nombres;
-            conversationContext.watsonContext=response.context;
+            conversationContext.watsonContext=response.context;*/
+            var msg = new builder.Message(session);            
+            msg.attachments([
+                new builder.HeroCard(session)
+                .title(`ACUERDO POR PARTE DEL BANCO`)                                                
+                .text(`El banco ofrece como alternativa pagar un valor de ${moneda.cambioMoneda(result.valor_cuota)} por ${result.nro_cuotas} cuotas mensuales.
+                \n\n¿Está de acuerdo?`)                                                                       
+                .buttons([builder.CardAction.imBack(session, "si", "Si"),
+                          builder.CardAction.imBack(session, "no","No")
+                        ]
+                )                     
+             ]);
+             session.userData.nuevoNroCuotas=result.nro_cuotas;
+             session.userData.nuevoValorCuota=result.valor_cuota;
+             response.context.nombreUsuario=infoUsuario.nombres;             
+             session.send(msg);                   
+             conversationContext.watsonContext=response.context;            
+
         });
 
 
@@ -199,14 +406,72 @@ conversation.message(payload, function(err, response) {
             if(capacidadPago>0){
                 result.valor_cuota=capacidadPago;
                 result.nro_cuotas=Math.round(result.valor_deuda/result.valor_cuota);
-            session.send(`Según su capacidad de pago las nuevas condiciones del crédito son:
+            /*session.send(`Según su capacidad de pago las nuevas condiciones del crédito son:
             \n\nValor de la cuota: ${moneda.cambioMoneda(result.valor_cuota)}
             \n\nNúmero de cuotas: ${result.nro_cuotas} cuotas mensuales.
-            \n\n¿Estas de acuerdo?`);
+            \n\n¿Está de acuerdo?`);
             session.userData.nuevoNroCuotas=result.nro_cuotas;
             session.userData.nuevoValorCuota=result.valor_cuota;
             response.context.nombreUsuario=infoUsuario.nombres;
+            conversationContext.watsonContext=response.context;*/
+            var msg = new builder.Message(session);
+            msg.addAttachment({
+                contentType: "application/vnd.microsoft.card.adaptive",
+                content: {
+                    type: "AdaptiveCard",                    
+                       body: [
+                            {
+                                "type": "TextBlock",
+                                "text": "ACUERDO CAPACIDAD DE PAGO",
+                                "size": "large",
+                                "weight": "bolder",
+
+                            },
+                            {
+                                "type": "TextBlock",
+                                "text": "Las nuevas condiciones del crédito son:"
+                            },   
+                            {
+                                "type": "FactSet",
+                                "facts": [
+                                    {
+                                        "title": "Valor de la cuota:",
+                                        "value": `${moneda.cambioMoneda(result.valor_cuota)}`
+                                    },
+                                    {
+                                        "title": "Número de cuotas:",
+                                        "value": `${result.nro_cuotas} cuotas mensuales`
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "TextBlock",
+                                "text": "¿Está de acuerdo?"
+                            }                           
+                         
+
+
+                        ],
+                        "actions": [
+                            {
+                                "type": "Action.Submit",
+			                    "title": "Si",
+			                    "data": "si"
+                            },
+                            {
+                                "type": "Action.Submit",
+			                    "title": "No",
+			                    "data": "no"
+                            }
+                      ]
+                }
+            });
+            session.userData.nuevoNroCuotas=result.nro_cuotas;
+            session.userData.nuevoValorCuota=result.valor_cuota;
+            response.context.nombreUsuario=infoUsuario.nombres;
+            session.send(msg);
             conversationContext.watsonContext=response.context;
+            
             }else{
                 session.send(`La capacidad de pago debe ser una suma mayor a cero, vuelva a ingresarla.`);
                 conversationContext.watsonContext=nodo.nodo_acuerdoCapacidadPago;
@@ -227,13 +492,71 @@ conversation.message(payload, function(err, response) {
             if(nroCuotas>0){
                 result.nro_cuotas=nroCuotas;
                 result.valor_cuota=Math.round(result.valor_deuda/result.nro_cuotas);
-                session.send(`Con este número de cuotas las nuevas condiciones del crédito son:
-            \n\nValor de la cuota: ${moneda.cambioMoneda(result.valor_cuota)}
-            \n\nNúmero de cuotas: ${result.nro_cuotas} cuotas mensuales.
-            \n\n¿Estas de acuerdo?`);
+                /*session.send(`Con este número de cuotas las nuevas condiciones del crédito son:
+                \n\nValor de la cuota: ${moneda.cambioMoneda(result.valor_cuota)}
+                \n\nNúmero de cuotas: ${result.nro_cuotas} cuotas mensuales.
+                \n\n¿Está de acuerdo?`);
+                session.userData.nuevoNroCuotas=result.nro_cuotas;
+                session.userData.nuevoValorCuota=result.valor_cuota;
+                response.context.nombreUsuario=infoUsuario.nombres;
+                conversationContext.watsonContext=response.context;*/
+
+                var msg = new builder.Message(session);
+            msg.addAttachment({
+                contentType: "application/vnd.microsoft.card.adaptive",
+                content: {
+                    type: "AdaptiveCard",                    
+                       body: [
+                            {
+                                "type": "TextBlock",
+                                "text": "ACUERDO POR NÚMERO DE CUOTAS ",
+                                "size": "large",
+                                "weight": "bolder",
+
+                            },
+                            {
+                                "type": "TextBlock",
+                                "text": "Las nuevas condiciones del crédito son:"
+                            },   
+                            {
+                                "type": "FactSet",
+                                "facts": [
+                                    {
+                                        "title": "Valor de la cuota:",
+                                        "value": `${moneda.cambioMoneda(result.valor_cuota)}`
+                                    },
+                                    {
+                                        "title": "Número de cuotas:",
+                                        "value": `${result.nro_cuotas} cuotas mensuales.`
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "TextBlock",
+                                "text": "¿Está de acuerdo?"
+                            }                           
+                         
+
+
+                        ],
+                        "actions": [
+                            {
+                                "type": "Action.Submit",
+			                    "title": "Si",
+			                    "data": "si"
+                            },
+                            {
+                                "type": "Action.Submit",
+			                    "title": "No",
+			                    "data": "no"
+                            }
+                      ]
+                }
+            });
             session.userData.nuevoNroCuotas=result.nro_cuotas;
             session.userData.nuevoValorCuota=result.valor_cuota;
             response.context.nombreUsuario=infoUsuario.nombres;
+            session.send(msg);
             conversationContext.watsonContext=response.context;
 
             }else{
@@ -253,10 +576,24 @@ conversation.message(payload, function(err, response) {
         let infoUsuario=session.userData.datosUsuario;
         let documento={cliente_id:infoUsuario.cedula};
         connect.buscarCreditoxCedula(documento,result=>{
-            session.send(`¿Que opción deseas para renegociar?
+            /*session.send(`¿Que opción deseas para renegociar?
             \n\n-Ver acuerdo propuesto por el banco.
             \n\n-Acuerdo por una capacidad de pago.
-            \n\n-Acuerdo por un número de cuotas.`);
+            \n\n-Acuerdo por un número de cuotas.`);*/
+            var msg = new builder.Message(session);            
+            msg.attachments([
+                new builder.HeroCard(session)
+                //.title(``)                                                
+                .text(`¿Que opción deseas para renegociar?`)                                                                       
+                .buttons([builder.CardAction.imBack(session, "Ver acuerdo propuesto por el banco", "Ver acuerdo propuesto por el banco"),
+                          builder.CardAction.imBack(session, "Acuerdo por una capacidad de pago","Acuerdo por una capacidad de pago"),                                  
+                          builder.CardAction.imBack(session, "Acuerdo por número de cuotas","Acuerdo por número de cuotas")
+                        ]
+                )                     
+             ]);
+            session.send(msg);                   
+            conversationContext.watsonContext=response.context;           
+           
         });
 
     }else if(response.output.action==="correoAcuerdoBanco"){
