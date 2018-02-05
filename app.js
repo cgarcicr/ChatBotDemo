@@ -152,7 +152,8 @@ conversation.message(payload, function(err, response) {
                     //msg.attachmentLayout(builder.AttachmentLayout.carousel)
                     msg.attachments([
                         new builder.HeroCard(session)
-                        .title(`Señor sr(b) ${session.userData.datosUsuario.nombres}`)                                                
+
+                        .title(`Señor sr(a) ${session.userData.datosUsuario.nombres}`)                                                
                         .text(`Estas son las opciones disponibles para tu crédito:`)                                                                       
                         .buttons([builder.CardAction.imBack(session, "solicitar estado del crédito", "Solicitar estado del crédito"),
                                   builder.CardAction.imBack(session, "solicitar renegociación","Solicitar renegociación")                                  
