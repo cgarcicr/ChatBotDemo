@@ -120,7 +120,11 @@ conversation.message(payload, function(err, response) {
                             "size": "large",
                             "weight": "bolder",
 
+
                         },
+
+
+
                             {
                                 "type": "TextBlock",
                                 "text": "¿En que te puedo ayudar hoy?"
@@ -169,7 +173,7 @@ conversation.message(payload, function(err, response) {
 
         });
 
-       
+
     }else if(response.output.action==="solicitarSaldo"){
         let infoUsuario=session.userData.datosUsuario;
         let documento={cliente_id:infoUsuario.cedula};
@@ -380,7 +384,7 @@ conversation.message(payload, function(err, response) {
             let cuotas=result.nro_cuotas;
 
             for(i=0;i<numeros.length;i++){
-                
+
                 if(cuotas===numeros[i]){
                     let aux=numeros[0]
                     result.nro_cuotas=numeros[i]+aux;
@@ -620,7 +624,7 @@ conversation.message(payload, function(err, response) {
         let documento={cliente_id:infoUsuario.cedula};
         connect.buscarCreditoxCedula(documento,result=>{
             session.userData.datosCreditoUsuario=result;
-            
+
             let contenido=`Sr(a) ${session.userData.datosUsuario.nombres}.
         \nReciba un cordial saludo,
         \nPara mí fue un placer haber atendido su requerimiento, referente al número de crédito ${session.userData.datosCreditoUsuario.nro_cuenta}.\nSegún la conversación previa se llegó a un nuevo acuerdo de pago con las siguientes condiciones:
@@ -660,7 +664,7 @@ conversation.message(payload, function(err, response) {
         });
 
 
-       
+
 
  }
     //Envio de correo al terminar la consulta del saldo
