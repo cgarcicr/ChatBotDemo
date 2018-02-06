@@ -380,7 +380,7 @@ conversation.message(payload, function(err, response) {
             for(i=0;i<numeros.length;i++){
                 
                 if(cuotas===numeros[i]){
-                    let aux=numeros[0]
+                    let aux=numeros[0];
                     result.nro_cuotas=numeros[i]+aux;
                     //result.valor_cuota=Math.round(result.valor_deuda/result.nro_cuotas);
                     result.valor_cuota=calcularCuota.calcularCuota(result.valor_deuda,0.01,result.nro_cuotas);
