@@ -143,9 +143,25 @@ insertarSolicitud:function(objeto){
       });
     });
 
-  }
+  },
+
+  //Metodo para incrementar contador de el id solicitudes
+  obtenerProximaSequencia:function(idCredito) {
+    MongoClient.connect(url, function (err, db) {
+      if (err) throw err;
+
+      var sequenceDocument = db.collection("contador").findAndModify({
+        query: {id_val: idCredito},
+        update: {$inc: {sequence_value: 1}},
+         remove:true
+
+      });
+
+      console.log('SEQUENCIA ',sequenceDocument.sequence_value)
 
 
+    })
 
 }
 
+}
