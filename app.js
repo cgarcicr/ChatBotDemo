@@ -111,13 +111,13 @@ conversation.message(payload, function(err, response) {
             content: {
                 type: "AdaptiveCard",                    
                    body: [
-                        /*{
+                        {
                             "type": "TextBlock",
                             "text": "¡Hola soy tu asesor virtual !",
                             "size": "large",
                             "weight": "bolder",
 
-                        },*/  
+                        },  
                             {
                                 "type": "TextBlock",
                                 "text": "¿En que te puedo ayudar hoy?"
