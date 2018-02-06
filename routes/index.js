@@ -85,7 +85,7 @@ router.post('/confirm',(req,res,next)=>{
        //correo del usuario al cual fue rechazada la solicitud
        let correo= result.datosUsuario.email;
        //Asunto del correo
-       let asunto = "Solicitud rechazada";
+       let asunto = "Solicitud Aceptada";
        //Llamado a la función para enviar correo electronico con la información del rechazo
        email.enviarEmail(correo,asunto,contenido);
 
