@@ -14,6 +14,7 @@ var connect = require('./mongoDb');
 var nodo=require('./public/javascripts/nodos');
 var email=require('./public/javascripts/sendEmail');
 var moneda=require('./public/javascripts/cambioMoneda');
+var calcularCuota=require('./public/javascripts/calcularCuota');
 
 require('dotenv').config({silent: true});
 
@@ -215,7 +216,7 @@ conversation.message(payload, function(err, response) {
                                         "value": `${result.tipo_credito}`
                                     },
                                     {
-                                        "title": "Cupo inicial:",
+                                        "title": "Desembolso inicial:",
                                         "value": `${moneda.cambioMoneda(result.cupo_total)}`
                                     },
                                     {
@@ -310,7 +311,7 @@ conversation.message(payload, function(err, response) {
                                         "value": `${result.tipo_credito}`
                                     },
                                     {
-                                        "title": "Cupo inicial:",
+                                        "title": "Desembolso inicial:",
                                         "value": `${moneda.cambioMoneda(result.cupo_total)}`
                                     },
                                     {
@@ -386,9 +387,10 @@ conversation.message(payload, function(err, response) {
             for(i=0;i<numeros.length;i++){
 
                 if(cuotas===numeros[i]){
-                    let aux=numeros[0]
+                    let aux=numeros[0];
                     result.nro_cuotas=numeros[i]+aux;
-                    result.valor_cuota=Math.round(result.valor_deuda/result.nro_cuotas);
+                    //result.valor_cuota=Math.round(result.valor_deuda/result.nro_cuotas);
+                    result.valor_cuota=calcularCuota.calcularCuota(result.valor_deuda,0.01,result.nro_cuotas);
                 }
 
             }
@@ -513,7 +515,8 @@ conversation.message(payload, function(err, response) {
 
             if(nroCuotas>0){
                 result.nro_cuotas=nroCuotas;
-                result.valor_cuota=Math.round(result.valor_deuda/result.nro_cuotas);
+                //result.valor_cuota=Math.round(result.valor_deuda/result.nro_cuotas);
+                result.valor_cuota=calcularCuota.calcularCuota(result.valor_deuda,0.01,result.nro_cuotas)
                 /*session.send(`Con este número de cuotas las nuevas condiciones del crédito son:
                 \n\nValor de la cuota: ${moneda.cambioMoneda(result.valor_cuota)}
                 \n\nNúmero de cuotas: ${result.nro_cuotas} cuotas mensuales.
@@ -696,7 +699,7 @@ conversation.message(payload, function(err, response) {
              let contenido = `Sr(a) ${session.userData.datosUsuario.nombres}.
              \nReciba un cordial saludo,
              \nSegún la consulta realizada en nuestro portal referente al número de crédito ${session.userData.datosCreditoUsario.nro_cuenta},\nrelaciono detalles de tu saldo actual y el estado del crédito :
-             \nTipo de crédito : ${session.userData.datosCreditoUsario.tipo_credito}\nCupo inicial : ${moneda.cambioMoneda(session.userData.datosCreditoUsario.cupo_total)}\nSaldo pendiente : ${moneda.cambioMoneda(session.userData.datosCreditoUsario.valor_deuda)}\nNúmero de cuotas : ${session.userData.datosCreditoUsario.nro_cuotas} mensuales\nValor de la cuota : ${moneda.cambioMoneda(session.userData.datosCreditoUsario.valor_cuota)}\nTasa Efectiva anual : ${session.userData.datosCreditoUsario.tasa}\nCrédito en mora : ${(session.userData.datosCreditoUsario.mora=='y')?'Si':'No'}
+             \nTipo de crédito : ${session.userData.datosCreditoUsario.tipo_credito}\nDesembolso inicial : ${moneda.cambioMoneda(session.userData.datosCreditoUsario.cupo_total)}\nSaldo pendiente : ${moneda.cambioMoneda(session.userData.datosCreditoUsario.valor_deuda)}\nNúmero de cuotas : ${session.userData.datosCreditoUsario.nro_cuotas} mensuales\nValor de la cuota : ${moneda.cambioMoneda(session.userData.datosCreditoUsario.valor_cuota)}\nTasa Efectiva anual : ${session.userData.datosCreditoUsario.tasa}\nCrédito en mora : ${(session.userData.datosCreditoUsario.mora=='y')?'Si':'No'}
              \nRecuerda que puedes consultar tu información en cualquier momento y visitar las opciones que tenemos disponibles para ti.
              \n\nAtentamente,
              \nBANWER\nAsesor virtual.
