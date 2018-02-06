@@ -168,6 +168,8 @@ conversation.message(payload, function(err, response) {
                 }
 
         });
+
+       
     }else if(response.output.action==="solicitarSaldo"){
         let infoUsuario=session.userData.datosUsuario;
         let documento={cliente_id:infoUsuario.cedula};
@@ -366,9 +368,25 @@ conversation.message(payload, function(err, response) {
         let documento={cliente_id:infoUsuario.cedula};
         connect.buscarCreditoxCedula(documento,result=>{
 
-            if(result.nro_cuotas<=36){
+            /*if(result.nro_cuotas<=36){
                 result.nro_cuotas=48;
                 result.valor_cuota=Math.round(result.valor_deuda/result.nro_cuotas);
+            }*/
+
+            //Array de cuotas.
+            var numeros=[12,24,36,48,60,72,84,96,108];
+
+            //Capturar el número de cuotas actual.
+            let cuotas=result.nro_cuotas;
+
+            for(i=0;i<numeros.length;i++){
+                
+                if(cuotas===numeros[i]){
+                    let aux=numeros[0]
+                    result.nro_cuotas=numeros[i]+aux;
+                    result.valor_cuota=Math.round(result.valor_deuda/result.nro_cuotas);
+                }
+
             }
 
             /*session.send(`El banco ofrece como alternativa pagar un valor de ${moneda.cambioMoneda(result.valor_cuota)} por ${result.nro_cuotas} cuotas mensuales.
@@ -598,7 +616,12 @@ conversation.message(payload, function(err, response) {
 
     }else if(response.output.action==="correoAcuerdoBanco"){
 
-        let contenido=`Sr(a) ${session.userData.datosUsuario.nombres}.
+        let infoUsuario=session.userData.datosUsuario;
+        let documento={cliente_id:infoUsuario.cedula};
+        connect.buscarCreditoxCedula(documento,result=>{
+            session.userData.datosCreditoUsuario=result;
+            
+            let contenido=`Sr(a) ${session.userData.datosUsuario.nombres}.
         \nReciba un cordial saludo,
         \nPara mí fue un placer haber atendido su requerimiento, referente al número de crédito ${session.userData.datosCreditoUsuario.nro_cuenta}.\nSegún la conversación previa se llegó a un nuevo acuerdo de pago con las siguientes condiciones:
         \nValor de la cuota: ${moneda.cambioMoneda(session.userData.nuevoValorCuota)}\nNúmero de cuotas: ${session.userData.nuevoNroCuotas} cuotas mensuales\n\nEsta información será previamente analizada por uno de nuestros asesores que se contactará con usted para oficializar el nuevo acuerdo.
@@ -625,8 +648,19 @@ conversation.message(payload, function(err, response) {
             "FechaSolicitud":session.userData.fechaActual
         }
 
+        console.log("-------",datosSolicitud);
+
         //llamamos el metodo para insertar la informacion del usuario, credito y el nuevo acuerdo
         connect.insertarSolicitud(datosSolicitud)
+
+
+
+
+
+        });
+
+
+       
 
  }
     //Envio de correo al terminar la consulta del saldo

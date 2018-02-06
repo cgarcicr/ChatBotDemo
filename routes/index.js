@@ -21,7 +21,7 @@ router.post('/save', function(req, res, next) {
   let estado = {$set:{"Estado":"Rechazado","motivoRechazo":req.body.motivo}};//Estado actual de la solicitud y motivo del rechazo
 
   //envio del id de la solicitud, estado, y motivo del rechazo para actualizar la coleccion SOLICITUDES
-  connect.actualizarSolicitudRechazo(idSolicitud,estado);
+  connect.actualizarSolicitud(idSolicitud,estado);
   //Buscar solicitud por id para obtener la información del usuario y cuenta
   connect.buscarSolicitud(idSolicitud, result=>{
     //construccion del cuerpo del correo
