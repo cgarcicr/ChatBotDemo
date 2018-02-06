@@ -111,13 +111,13 @@ conversation.message(payload, function(err, response) {
             content: {
                 type: "AdaptiveCard",                    
                    body: [
-                        {
+                        /*{
                             "type": "TextBlock",
-                            "text": "¡Hola soy tu asesor virtual !.",
+                            "text": "¡Hola soy tu asesor virtual !",
                             "size": "large",
                             "weight": "bolder",
 
-                        },  
+                        },*/  
                             {
                                 "type": "TextBlock",
                                 "text": "¿En que te puedo ayudar hoy?"
@@ -127,7 +127,7 @@ conversation.message(payload, function(err, response) {
                         {
                             "type": "Action.Submit",
                             "title": "Información de tu crédito",
-                            "data": "credito"
+                            "data": "crédito"
                         }
                   ]
             }
@@ -426,7 +426,7 @@ conversation.message(payload, function(err, response) {
                             },
                             {
                                 "type": "TextBlock",
-                                "text": "Las nuevas condiciones del crédito son:"
+                                "text": "Las nuevas condiciones del crédito serían:"
                             },   
                             {
                                 "type": "FactSet",
@@ -513,7 +513,7 @@ conversation.message(payload, function(err, response) {
                             },
                             {
                                 "type": "TextBlock",
-                                "text": "Las nuevas condiciones del crédito son:"
+                                "text": "Las nuevas condiciones del crédito serían:"
                             },   
                             {
                                 "type": "FactSet",
