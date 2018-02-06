@@ -43,7 +43,7 @@
             <td><%= solicitud[i].Estado %></td>
             <td>
               <%if(solicitud[i].Estado == "Rechazado" || solicitud[i].Estado == "Aceptado" ){%>
-              <button onclick="imprimir(this)" id="btnDarkBlue2"
+              <button onclick="imprimir(this)"
                       data-sol="<%=JSON.stringify(solicitud[i])%>"
                       type="button" class="btn btn-outline-default btnDarkBlue2"
 
@@ -53,7 +53,7 @@
               <%}else{%>
               <button onclick="imprimir(this)" id="btnDarkBlue"
                       data-sol="<%=JSON.stringify(solicitud[i])%>"
-                      type="button" class="btn btn-outline-primary"
+                      type="button" class="btn btnDarkBlue"
 
                       data-toggle="modal" data-target="#myModal">
                 Ver Detalles
@@ -94,16 +94,20 @@
                       <b>Nombre Cliente: </b><label id="pos2"></label></br>
                       <b>Nro Cédula: </b><label id="pos3"></label></br>
                       <b>Nro Cuenta: </b><label id="pos4"></label></br>
+                      <b>Valor Total deuda: </b><label id="pos6"></label></br>
                      </div>
 
                     <div class="col-md-6">
+                      <b>Estado de solicitud : </b><label id="estado"></label></br>
                       <b>Tipo de Solicitud: </b><label id="pos1"></label></br>
                       <b>Tipo Crédito: </b><label id="pos5"></label></br>
-                      <b>Valor Total deuda: </b><label id="pos6"></label></br>
+
                     </div>
 
                   </div>
-                  <b id="labelMotivoRechazo">Motivo de rechazo: </b><label  id="motivoRechazo"></label>
+
+                  <b id="labelObservaciones">Observaciones: </b><label  id="observaciones"></label>
+
                   <table class="table table-sm tableModal" border="1px">
                     <thead>
                     <tr>
@@ -228,16 +232,21 @@
               </div>
               <div class="modal-body">
                 <p>Si confirma esta acción se realizaran las afectaciones solicitadas en la cuenta del usuario</p>
-                <b>¿Estas seguro?</b>
+
+                <form action="/confirm" method="post">
+                  <div class="form-group">
+                    <label>Observaciones para la aceptación</label>
+                    <textarea name="motivoAceptacion" placeholder="Escrive brevemente los motivos de la aceptación" class="form-control" id="motivoAceptacion" rows="3" required></textarea>
+
+                  </div>
+                  <input type="hidden" name="solicitudB" id="id_solicitudAceptada">
+                  <b>¿Estas seguro?</b>
               </div>
               <div class="modal-footer">
 
                   <button class="btn btn-default" data-dismiss="modal">No </button>
-
-                  <form action="/confirm" method="post">
-                    <input type="hidden" name="solicitudB" id="id_solicitudAceptada">
-                    <button type="submit" class="btn btnDarkBlue" >Si </button>
-                  </form>
+                  <button type="submit" class="btn btnDarkBlue" >Si </button>
+                </form>
 
 
               </div>
@@ -273,23 +282,25 @@
         $("#pos8").text(cambioIndividual(data.nuevaCuota));
         $("#pos9").text(data.datosCreditoActual.nro_cuotas);
         $("#pos10").text(data.nuevoNroCuotas);
+        $('#estado').text(data.Estado)
         $("#id_solicitud").val(data._id);
         $("#id_solicitudAceptada").val(data._id);
-        $("#motivoRechazo").text(data.motivoRechazo)
+        $("#observaciones").text(data.observaciones)
+
       }
       //Script para remover elementos de la ventana modal (Cuando boton de "ver detalles" sea por rechazo)
         $(".btnDarkBlue2").click(()=> {
         $(".botonesAcciones").addClass( "hiddeElement" )
-        $("#motivoRechazo").removeClass("hiddeElement")
-        $("#labelMotivoRechazo").removeClass("hiddeElement")
+        $("#observaciones").removeClass("hiddeElement")
+        $("#labelObservaciones").removeClass("hiddeElement")
 
       })
 
       //Script para añadir elementos de la ventana modal (Cuando boton de "ver detalles" sea por solicitud)
-      $("#btnDarkBlue").click(()=> {
+      $(".btnDarkBlue").click(()=> {
         $(".botonesAcciones").removeClass( "hiddeElement" )//remueve la clase que oculta los botones de acciones en la modal
-        $("#motivoRechazo").addClass("hiddeElement")//añade la clase que oculta la información del motivo de rechazo en la modal
-        $("#labelMotivoRechazo").addClass("hiddeElement")
+        $("#observaciones").addClass("hiddeElement")//añade la clase que oculta la información del motivo de rechazo en la modal
+        $("#labelObservaciones").addClass("hiddeElement")
       })
 
 
