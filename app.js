@@ -270,9 +270,15 @@ conversation.message(payload, function(err, response) {
         );
 
     }else if(response.output.action==="solicitarRenegociacion"){
+
         let infoUsuario=session.userData.datosUsuario;
         let documento={cliente_id:infoUsuario.cedula};
         connect.buscarCreditoxCedula(documento,result=>{
+
+          if(result.solicitudesPendientes==="n"){
+
+
+
             /*session.send(`Sr(a) %s La información para el número de credito %s es:
             \n\nTipo de crédito: %s
             \n\nCupo inicial: %s
@@ -364,6 +370,12 @@ conversation.message(payload, function(err, response) {
             session.send(msg);
             conversationContext.watsonContext=response.context;
 
+          }else{
+
+
+            session.send(`Sr(a) ${session.userData.datosUsuario.nombres} usted ya cuenta con una solicitud de renegociación en curso. Te invito a consultar el estado en localhost:3000`);
+            conversationContext.watsonContext=nodo.nodo_listadoDeServicios;
+          }
 
         });
 
@@ -628,9 +640,8 @@ conversation.message(payload, function(err, response) {
 
         connect.buscarCreditoxCedula(documento,result=>{
 
-          //Verificar si el usuario no cuenta con solicitudes pendientes
-          if(result.solicitudesPendientes==="n"){
-             session.userData.datosCreditoUsuario=result;
+          session.userData.datosCreditoUsuario = result;
+
 
              let contenido=`Sr(a) ${session.userData.datosUsuario.nombres}.
             \nReciba un cordial saludo,
@@ -669,15 +680,7 @@ conversation.message(payload, function(err, response) {
                 let nuevosValores = {$set:{"solicitudesPendientes":"y"}};
                 connect.actualizarCreditoUsuario(cuenta_id,nuevosValores)
 
-           }else{
 
-
-            session.send(`Usted ya cuenta con una solicitud en curso`);
-
-
-
-
-          }
 
 
 
@@ -724,7 +727,7 @@ conversation.message(payload, function(err, response) {
 
         let contenido = `Sr(a) ${session.userData.datosUsuario.nombres}.
            \nReciba un cordial saludo,
-           \nPara mí fue un placer haber atendido su requerimiento, referente al número de crédito ${session.userData.datosCreditoUsario.nro_cuenta}.\nSegún la conversación previa se llegó a un nuevo acuerdo de pago con las siguientes condiciones:
+           \nPara mí fue un placer haber atendido su requerimiento, referente al número de crédito ${session.userData.datosCreditoUsuario.nro_cuenta}.\nSegún la conversación previa se llegó a un nuevo acuerdo de pago con las siguientes condiciones:
            \nValor de la cuota: ${moneda.cambioMoneda(session.userData.nuevoValorCuota)}\nNúmero de cuotas: ${session.userData.nuevoNroCuotas} cuotas mensuales\n\nEsta información será previamente analizada por uno de nuestros asesores que se contactará con usted para oficializar el nuevo acuerdo.
            \n\nAtentamente,
            \nBANWERC\nAsesor virtual.
