@@ -39,9 +39,25 @@ module.exports={
               "node_6_1516204961399":[0]
            }
         }
-     }
+     },
+
+     nodo_renegociar:
+    {"conversation_id":"3afc0d38-a7a0-4039-9a4d-e53a927ee9e6",
+    "system":{"dialog_stack":[{"dialog_node":"node_25_1516137236595"}],
+    "dialog_turn_counter":4,
+    "dialog_request_counter":4,
+    "_node_output_map":{
+        "node_1_1515513344354":[0],
+        "node_1_1515528418771":[0],
+        "node_2_1515618813727":[0],
+        "node_25_1516137236595":[0]
+    }
+}
+}
+    
     
     }
+
     
     
     

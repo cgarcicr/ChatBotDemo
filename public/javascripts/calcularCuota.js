@@ -17,4 +17,16 @@ return cuota;
 
 };
 
-//console.log(calcularCuota(10000000,0.01,36));
+module.exports.calcularNroCuotas=(capitalInicial,interes,valorCuota)=>{
+    //Formula para calcular el nro de cuotas n=Log(A)-Log(A-i.P)/Log(1+i)
+    let a=valorCuota;//valor cuota
+    let i=interes;//interesnominal (12%= 0.12/12 = 0.01)
+    let p=capitalInicial//capital inicial
+
+    let numerador=Math.log(a)-Math.log(a-i*p);
+    let denominador=Math.log(1+i);
+    let nroCuotas=numerador/denominador;
+
+    return Math.round(nroCuotas);
+};
+

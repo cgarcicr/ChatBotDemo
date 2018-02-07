@@ -378,22 +378,88 @@ conversation.message(payload, function(err, response) {
                 result.valor_cuota=Math.round(result.valor_deuda/result.nro_cuotas);
             }*/
 
-            //Array de cuotas.
-            var numeros=[12,24,36,48,60,72,84,96,108];
+            //Array de cuotas capacidad de hasta 120
+            var numeros=[12,24,36,48,60,72,84,96,108,120,132,144,156,168,180,192,204,216,228,240,252,264,276,288,300];
+            //var numeros=[12,24,36,48,60,72,84,96,108];
+            var cont=1;
+            var mostrar=false;
 
             //Capturar el número de cuotas actual.
             let cuotas=result.nro_cuotas;
 
             for(i=0;i<numeros.length;i++){
-
-                if(cuotas===numeros[i]){
+                if(numeros[i]===cuotas){
                     let aux=numeros[0];
                     result.nro_cuotas=numeros[i]+aux;
-                    //result.valor_cuota=Math.round(result.valor_deuda/result.nro_cuotas);
-                    result.valor_cuota=calcularCuota.calcularCuota(result.valor_deuda,0.01,result.nro_cuotas);
+                    mostrar=true;
+                }
+            }
+
+            if(mostrar===true){                
+                //result.valor_cuota=Math.round(result.valor_deuda/result.nro_cuotas);
+                result.valor_cuota=calcularCuota.calcularCuota(result.valor_deuda,0.01,result.nro_cuotas);
+                        var msg = new builder.Message(session);
+                        msg.attachments([
+                            new builder.HeroCard(session)
+                            .title(`ACUERDO POR PARTE DEL BANCO`)
+                            .text(`El banco ofrece como alternativa pagar un valor de ${moneda.cambioMoneda(result.valor_cuota)} por ${result.nro_cuotas} cuotas mensuales.
+                            \n\n¿Está de acuerdo?`)
+                            .buttons([builder.CardAction.imBack(session, "si", "Si"),
+                                    builder.CardAction.imBack(session, "no","No")
+                                    ]
+                            )
+                        ]);
+                        
+                        session.userData.nuevoNroCuotas=result.nro_cuotas;
+                        session.userData.nuevoValorCuota=result.valor_cuota;
+                        response.context.nombreUsuario=infoUsuario.nombres;
+                        session.send(msg);
+                        conversationContext.watsonContext=response.context;
+                        
+                }
+                
+
+           /* if(cuotas===120){                  
+                session.send(`En el momento tiene el número de cuotas máximas que el banco le otorga`);
+                conversationContext.watsonContext=nodo.nodo_renegociar;
+            }*/
+
+            if(mostrar===false){
+                let ciclo=false;
+                let j=0;
+                while(ciclo!=true){
+                    if(cuotas>numeros[j]){ 
+                          j=j+1;                      
+                       }else{
+                        result.nro_cuotas=numeros[j];   
+                        result.valor_cuota=calcularCuota.calcularCuota(result.valor_deuda,0.01,result.nro_cuotas);
+                        var msg = new builder.Message(session);
+                            msg.attachments([
+                                new builder.HeroCard(session)
+                                .title(`ACUERDO POR PARTE DEL BANCO`)
+                                .text(`El banco ofrece como alternativa pagar un valor de ${moneda.cambioMoneda(result.valor_cuota)} por ${result.nro_cuotas} cuotas mensuales.
+                                \n\n¿Está de acuerdo?`)
+                                .buttons([builder.CardAction.imBack(session, "si", "Si"),
+                                        builder.CardAction.imBack(session, "no","No")
+                                        ]
+                                )
+                            ]);
+                            ciclo=true;                            
+                            session.userData.nuevoNroCuotas=result.nro_cuotas;
+                            session.userData.nuevoValorCuota=result.valor_cuota;
+                            response.context.nombreUsuario=infoUsuario.nombres;
+                            session.send(msg);
+                            conversationContext.watsonContext=response.context;  
+                       } 
+
                 }
 
             }
+
+            
+
+
+
 
             /*session.send(`El banco ofrece como alternativa pagar un valor de ${moneda.cambioMoneda(result.valor_cuota)} por ${result.nro_cuotas} cuotas mensuales.
             \n\n¿Está de acuerdo?`);
@@ -401,22 +467,7 @@ conversation.message(payload, function(err, response) {
             session.userData.nuevoValorCuota=result.valor_cuota;
             response.context.nombreUsuario=infoUsuario.nombres;
             conversationContext.watsonContext=response.context;*/
-            var msg = new builder.Message(session);
-            msg.attachments([
-                new builder.HeroCard(session)
-                .title(`ACUERDO POR PARTE DEL BANCO`)
-                .text(`El banco ofrece como alternativa pagar un valor de ${moneda.cambioMoneda(result.valor_cuota)} por ${result.nro_cuotas} cuotas mensuales.
-                \n\n¿Está de acuerdo?`)
-                .buttons([builder.CardAction.imBack(session, "si", "Si"),
-                          builder.CardAction.imBack(session, "no","No")
-                        ]
-                )
-             ]);
-             session.userData.nuevoNroCuotas=result.nro_cuotas;
-             session.userData.nuevoValorCuota=result.valor_cuota;
-             response.context.nombreUsuario=infoUsuario.nombres;
-             session.send(msg);
-             conversationContext.watsonContext=response.context;
+            
 
         });
 
@@ -427,9 +478,10 @@ conversation.message(payload, function(err, response) {
         let documento={cliente_id:infoUsuario.cedula};
         connect.buscarCreditoxCedula(documento,result=>{
 
-            if(capacidadPago>0){
+            if(capacidadPago>=120000){
                 result.valor_cuota=capacidadPago;
-                result.nro_cuotas=Math.round(result.valor_deuda/result.valor_cuota);
+                //result.nro_cuotas=Math.round(result.valor_deuda/result.valor_cuota);
+                result.nro_cuotas=calcularCuota.calcularNroCuotas(result.valor_deuda,0.01,result.valor_cuota);
             /*session.send(`Según su capacidad de pago las nuevas condiciones del crédito son:
             \n\nValor de la cuota: ${moneda.cambioMoneda(result.valor_cuota)}
             \n\nNúmero de cuotas: ${result.nro_cuotas} cuotas mensuales.
@@ -497,7 +549,7 @@ conversation.message(payload, function(err, response) {
             conversationContext.watsonContext=response.context;
 
             }else{
-                session.send(`La capacidad de pago debe ser una suma mayor a cero, vuelva a ingresarla.`);
+                session.send(`La capacidad de pago debe ser una suma mayor a $120,000.00, vuelva a ingresarla.`);
                 conversationContext.watsonContext=nodo.nodo_acuerdoCapacidadPago;
                 //conversationContext.watsonContext=response.context;
             }
@@ -513,7 +565,7 @@ conversation.message(payload, function(err, response) {
         let documento={cliente_id:infoUsuario.cedula};
         connect.buscarCreditoxCedula(documento,result=>{
 
-            if(nroCuotas>0){
+            if(nroCuotas>0 && nroCuotas<=120){
                 result.nro_cuotas=nroCuotas;
                 //result.valor_cuota=Math.round(result.valor_deuda/result.nro_cuotas);
                 result.valor_cuota=calcularCuota.calcularCuota(result.valor_deuda,0.01,result.nro_cuotas)
@@ -585,7 +637,7 @@ conversation.message(payload, function(err, response) {
             conversationContext.watsonContext=response.context;
 
             }else{
-                session.send(`El número de cuotas debe ser mayor a cero, vuelva a ingresarlo.`);
+                session.send(`El número de cuotas debe ser mayor a cero y menor o igual a 120, vuelva a ingresarlo.`);
                 conversationContext.watsonContext=nodo.nodo_acuerdoCapacidadCuotas;
             }
 
