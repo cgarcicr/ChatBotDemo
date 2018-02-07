@@ -107,7 +107,7 @@ conversation.message(payload, function(err, response) {
     conversationContext.watsonContext = response.context;
     console.log('-------',JSON.stringify(response.context));
 
-    if(response.output.action==="saludar"){
+    /*if(response.output.action==="saludar"){
         //session.send("En que te puedo ayudar hoy?");
         var msg = new builder.Message(session);
         msg.addAttachment({
@@ -145,7 +145,7 @@ conversation.message(payload, function(err, response) {
         conversationContext.watsonContext=response.context;
 
     }
-    else if (response.output.action === "buscarCedula") {
+    else*/ if (response.output.action === "buscarCedula") {
         let documento={cedula:response.context.nroCedula};
         connect.buscarxCedula(documento,result=>{
                 session.userData.datosUsuario=result;
@@ -747,9 +747,9 @@ conversation.message(payload, function(err, response) {
              let contenido=`Sr(a) ${session.userData.datosUsuario.nombres}.
             \nReciba un cordial saludo,
             \nPara mí fue un placer haber atendido su requerimiento, referente al número de crédito ${session.userData.datosCreditoUsuario.nro_cuenta}.\nSegún la conversación previa se llegó a un nuevo acuerdo de pago con las siguientes condiciones:
-            \nValor de la cuota: ${moneda.cambioMoneda(session.userData.nuevoValorCuota)}\nNúmero de cuotas: ${session.userData.nuevoNroCuotas} cuotas mensuales\n\nEsta información será previamente analizada por uno de nuestros asesores que se contactará con usted para oficializar el nuevo acuerdo.
+            \nValor de la cuota: ${moneda.cambioMoneda(session.userData.nuevoValorCuota)}\nNúmero de cuotas: ${session.userData.nuevoNroCuotas} cuotas mensuales\n\nEsta información será analizada por uno de nuestros asesores que se contactará con usted para oficializar el nuevo acuerdo.
             \n\nAtentamente,
-            \nBANWERC\nAsesor virtual.
+            \nAsesor virtual.
             `;
                 let correo= session.userData.datosUsuario.email;
 
@@ -806,7 +806,7 @@ conversation.message(payload, function(err, response) {
              \nTipo de crédito : ${session.userData.datosCreditoUsario.tipo_credito}\nDesembolso inicial : ${moneda.cambioMoneda(session.userData.datosCreditoUsario.cupo_total)}\nSaldo pendiente : ${moneda.cambioMoneda(session.userData.datosCreditoUsario.valor_deuda)}\nNúmero de cuotas : ${session.userData.datosCreditoUsario.nro_cuotas} mensuales\nValor de la cuota : ${moneda.cambioMoneda(session.userData.datosCreditoUsario.valor_cuota)}\nTasa Efectiva anual : ${session.userData.datosCreditoUsario.tasa}\nCrédito en mora : ${(session.userData.datosCreditoUsario.mora=='y')?'Si':'No'}
              \nRecuerda que puedes consultar tu información en cualquier momento y visitar las opciones que tenemos disponibles para ti.
              \n\nAtentamente,
-             \nBANWER\nAsesor virtual.
+             \nAsesor virtual.
              `;
 
              let correo= session.userData.datosUsuario.email;
@@ -829,9 +829,9 @@ conversation.message(payload, function(err, response) {
         let contenido = `Sr(a) ${session.userData.datosUsuario.nombres}.
            \nReciba un cordial saludo,
            \nPara mí fue un placer haber atendido su requerimiento, referente al número de crédito ${session.userData.datosCreditoUsuario.nro_cuenta}.\nSegún la conversación previa se llegó a un nuevo acuerdo de pago con las siguientes condiciones:
-           \nValor de la cuota: ${moneda.cambioMoneda(session.userData.nuevoValorCuota)}\nNúmero de cuotas: ${session.userData.nuevoNroCuotas} cuotas mensuales\n\nEsta información será previamente analizada por uno de nuestros asesores que se contactará con usted para oficializar el nuevo acuerdo.
+           \nValor de la cuota: ${moneda.cambioMoneda(session.userData.nuevoValorCuota)}\nNúmero de cuotas: ${session.userData.nuevoNroCuotas} cuotas mensuales\n\nEsta información será analizada por uno de nuestros asesores que se contactará con usted para oficializar el nuevo acuerdo.
            \n\nAtentamente,
-           \nBANWERC\nAsesor virtual.
+           \nAsesor virtual.
            `;
         let correo = session.userData.datosUsuario.email;
         let asunto = `Solicitud acuerdo de pago`;
@@ -884,9 +884,9 @@ conversation.message(payload, function(err, response) {
         let contenido = `Sr(a) ${session.userData.datosUsuario.nombres}.
            \nReciba un cordial saludo,
            \nPara mí fue un placer haber atendido su requerimiento, referente al número de crédito ${session.userData.datosCreditoUsario.nro_cuenta}.\nSegún la conversación previa se llegó a un nuevo acuerdo de pago con las siguientes condiciones:
-           \nValor de la cuota: ${moneda.cambioMoneda(session.userData.nuevoValorCuota)}\nNúmero de cuotas: ${session.userData.nuevoNroCuotas} cuotas mensuales\n\nEsta información será previamente analizada por uno de nuestros asesores que se contactará con usted para oficializar el nuevo acuerdo.
+           \nValor de la cuota: ${moneda.cambioMoneda(session.userData.nuevoValorCuota)}\nNúmero de cuotas: ${session.userData.nuevoNroCuotas} cuotas mensuales\n\nEsta información será analizada por uno de nuestros asesores que se contactará con usted para oficializar el nuevo acuerdo.
            \n\nAtentamente,
-           \nBANWERC\nAsesor virtual.
+           \nAsesor virtual.
            `;
         let correo = session.userData.datosUsuario.email;
         let asunto = `Solicitud acuerdo de pago`;
