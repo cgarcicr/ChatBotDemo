@@ -59,7 +59,8 @@ module.exports={
   listarSolicitudes:function(cb){
     MongoClient.connect(url, function(err, db) {
       if (err) throw err;
-      db.collection('solicitudes').find({}).toArray(function(err, result) {
+      let sort = { numeroSolicitud: 1 };
+      db.collection('solicitudes').find({}).sort(sort).toArray(function(err, result) {
         if (err) throw err;
         if(result.length===0){
            cb(result);
@@ -110,7 +111,7 @@ insertarSolicitud:function(objeto){
     if (err) throw err;
     db.collection('solicitudes').insertOne(objeto,function(err, result) {
       if (err) throw err;
-      console.log('Registro insertado', objeto)
+      console.log('Solicitud creada')
        db.close();
     });
   });
@@ -138,30 +139,42 @@ insertarSolicitud:function(objeto){
 
       db.collection('creditos').updateOne({"_id": objectId(idCredito)}, newValues, function (err, result) {
         if (err) throw err;
-        console.log('Crédito Actualizado')
+        console.log('Crédito Actualizado');
         db.close();
       });
     });
 
   },
 
-  //Metodo para incrementar contador de el id solicitudes
-  obtenerProximaSequencia:function(idCredito) {
+  //Metodo para incrementar contador del id solicitudes
+  actualizarSecuencia:function(cb) {
     MongoClient.connect(url, function (err, db) {
       if (err) throw err;
 
-      var sequenceDocument = db.collection("contador").findAndModify({
-        query: {id_val: idCredito},
-        update: {$inc: {sequence_value: 1}},
-         remove:true
+        let query = {"id": "productid" };
+        let update = {'$inc': { 'seq': 1 } };
+        let options = {'new': true};
+        let sort = [];
 
-      });
+      db.collection("contador").findAndModify(query,sort,update,options,(err,doc)=>{
+       if(err) throw err;
 
-      console.log('SEQUENCIA ',sequenceDocument.sequence_value)
+       if(!doc){
+         console.log('Contador no encontrado');
+       }else{
+         console.log('Secuencia aumentada en ', doc.value.seq)
+       }
+
+       cb(doc.value.seq);
+
+       db.close();
+
+     })
 
 
-    })
+
+  })
 
 }
 
-}
+};

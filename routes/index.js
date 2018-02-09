@@ -27,7 +27,7 @@ router.post('/save', function(req, res, next) {
     //construccion del cuerpo del correo
     let contenido = `Sr(a) ${result.datosUsuario.nombres}.
              \nReciba un cordial saludo,
-             \nSegún la solicitud realizada el día ${result.FechaSolicitud} referente al número de crédito ${result.datosCreditoActual.nro_cuenta},\ninformamos que fue RECHAZADA por los siguientes motivos:
+             \nSegún la solicitud Nro. ${result.numeroSolicitud} realizada el día ${result.FechaSolicitud} referente al número de crédito ${result.datosCreditoActual.nro_cuenta},\ninformamos que fue RECHAZADA por los siguientes motivos:
              \n*${req.body.motivo}
              \nRecuerda que puedes consultar tu información en cualquier momento y visitar las opciones que tenemos disponibles para ti.
              \n\nAtentamente,
@@ -62,7 +62,6 @@ router.post('/confirm',(req,res,next)=>{
      let motivoAceptacion = req.body.motivoAceptacion;
      let nuevaCuota = result.nuevaCuota;
      let nuevoNroCuotas = result.nuevoNroCuotas;
-     console.log('TIPO DE DATO ',typeof(nuevoNroCuotas));
      let nuevosValores = {$set:{"nro_cuotas": nuevoNroCuotas, "valor_cuota":nuevaCuota,"solicitudesPendientes":"n"}};
      let aceptado = {$set:{"Estado": "Aceptado","observaciones":motivoAceptacion}};
 
@@ -74,7 +73,7 @@ router.post('/confirm',(req,res,next)=>{
        //construccion del cuerpo del correo
        let contenido = `Sr(a) ${result.datosUsuario.nombres}.
              \nReciba un cordial saludo,
-             \nSegún la solicitud realizada el día ${result.FechaSolicitud} referente al número de crédito ${result.datosCreditoActual.nro_cuenta},\ninformamos que fue ACEPTADA.\nA continuación los detalles de la solicitud procesada: 
+             \nSegún la solicitud  Nro. ${result.numeroSolicitud} realizada el día ${result.FechaSolicitud} referente al número de crédito ${result.datosCreditoActual.nro_cuenta},\ninformamos que fue ACEPTADA.\nA continuación los detalles de la solicitud procesada: 
              \n- Monto solicitado: ${moneda.cambioMoneda(result.nuevaCuota)}
              \n- Número de cuotas solicitadas: ${result.nuevoNroCuotas}
              \n- Observaciones: ${req.body.motivoAceptacion}

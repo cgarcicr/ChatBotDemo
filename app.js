@@ -83,9 +83,6 @@ if (!conversationContext) conversationContext = {};
 payload.context = conversationContext.watsonContext;
 
 
-
-
-
 //Fecha Actual
   var hoy = new Date();
   var dd = hoy.getDate();
@@ -105,7 +102,7 @@ conversation.message(payload, function(err, response) {
   } else {
     session.send(response.output.text);
     conversationContext.watsonContext = response.context;
-    console.log('-------',JSON.stringify(response.context));
+
 
     if(response.output.action==="saludar"){
         //session.send("En que te puedo ayudar hoy?");
@@ -692,42 +689,54 @@ conversation.message(payload, function(err, response) {
           session.userData.datosCreditoUsuario = result;
 
 
-             let contenido=`Sr(a) ${session.userData.datosUsuario.nombres}.
-            \nReciba un cordial saludo,
-            \nPara mí fue un placer haber atendido su requerimiento, referente al número de crédito ${session.userData.datosCreditoUsuario.nro_cuenta}.\nSegún la conversación previa se llegó a un nuevo acuerdo de pago con las siguientes condiciones:
-            \nValor de la cuota: ${moneda.cambioMoneda(session.userData.nuevoValorCuota)}\nNúmero de cuotas: ${session.userData.nuevoNroCuotas} cuotas mensuales\n\nEsta información será previamente analizada por uno de nuestros asesores que se contactará con usted para oficializar el nuevo acuerdo.
-            \n\nAtentamente,
-            \nBANWERC\nAsesor virtual.
-            `;
+
+           //Obtener el número de la solicitud autogenerada para insertar la secuencia
+           //Callback para capturar el numero de la secuencia
+              connect.actualizarSecuencia(nroSolicitud=>{
+
+                 //Objeto con los datos de la solicitud
+                 let datosSolicitud =
+                   {
+                   "numeroSolicitud":"RC-0" + nroSolicitud,
+                   "datosUsuario": session.userData.datosUsuario,
+                   "datosCreditoActual": session.userData.datosCreditoUsuario,
+                   "nuevaCuota":session.userData.nuevoValorCuota,
+                   "nuevoNroCuotas":session.userData.nuevoNroCuotas,
+                   "tipoAcuerdo":"Acuerdo Banco",
+                   "Estado":"Solicitada",
+                   "FechaSolicitud":session.userData.fechaActual,
+                   "observaciones":""
+                 };
+
+                  //Insertar la informacion del usuario, credito y el nuevo acuerdo
+                  connect.insertarSolicitud(datosSolicitud);
+                  //Actualiza el campo solicitudpendiente del credito
+                  let cuenta_id = result._id;
+                  let nuevosValores = {$set:{"solicitudesPendientes":"y"}};
+                  connect.actualizarCreditoUsuario(cuenta_id,nuevosValores)
+
+
+                let contenido=`Sr(a) ${session.userData.datosUsuario.nombres}.
+                \nReciba un cordial saludo,
+                \nPara mí fue un placer haber atendido su requerimiento, referente al número de crédito ${session.userData.datosCreditoUsuario.nro_cuenta}.\nSegún la conversación previa se llegó a un nuevo acuerdo de pago con las siguientes condiciones:
+                \nValor de la cuota: ${moneda.cambioMoneda(session.userData.nuevoValorCuota)}\nNúmero de cuotas: ${session.userData.nuevoNroCuotas} cuotas mensuales\n\nEsta información será previamente analizada por uno de nuestros asesores que se contactará con usted para oficializar el nuevo acuerdo.
+                \n\nAtentamente,
+                \nBANWERC\nAsesor virtual.
+                `;
                 let correo= session.userData.datosUsuario.email;
 
-                let asunto=`Solicitud acuerdo de pago`;
+                let asunto=`Solicitud acuerdo de pago # RC-0${nroSolicitud}`;
 
                 //llamamos el metodo para enviar email pasando como parametro correoElectronico,asunto y cuerpo de correo
                 email.enviarEmail(correo,asunto,contenido);
 
-                //Guardamos el objeto con los datos de la solicitud
-                let datosSolicitud= {
 
-                  "datosUsuario": session.userData.datosUsuario,
-                  "datosCreditoActual": session.userData.datosCreditoUsuario,
-                  "nuevaCuota":session.userData.nuevoValorCuota,
-                  "nuevoNroCuotas":session.userData.nuevoNroCuotas,
-                  "tipoAcuerdo":"Acuerdo Banco",
-                  "Estado":"Solicitada",
-                  "FechaSolicitud":session.userData.fechaActual,
-                  "observaciones":""
-                }
+               });
 
 
 
-                //llamamos el metodo para insertar la informacion del usuario, credito y el nuevo acuerdo
-                connect.insertarSolicitud(datosSolicitud)
 
-                //Actualiza el campo solicitudpendiente del credito
-                let cuenta_id = result._id;
-                let nuevosValores = {$set:{"solicitudesPendientes":"y"}};
-                connect.actualizarCreditoUsuario(cuenta_id,nuevosValores)
+
 
 
 
@@ -740,8 +749,8 @@ conversation.message(payload, function(err, response) {
 
 
  }
-    //Envio de correo al terminar la consulta del saldo
-    else if(response.output.action=="correoInfoSaldo"){
+    //Envío de correo al terminar la consulta del saldo
+    else if(response.output.action == "correoInfoSaldo"){
 
            let documento = {cliente_id:session.userData.datosUsuario.cedula}
 
@@ -764,7 +773,7 @@ conversation.message(payload, function(err, response) {
            });
         }
 
-    //Envio de correo si la opcion seleccionada es por capacidad de pago
+    //Envío de correo si la opcion seleccionada es por capacidad de pago
         else if(response.output.action == "correoCapacidadPago"){
 
       let infoUsuario=session.userData.datosUsuario;
@@ -774,39 +783,52 @@ conversation.message(payload, function(err, response) {
         session.userData.datosCreditoUsuario = result;
 
 
-        let contenido = `Sr(a) ${session.userData.datosUsuario.nombres}.
-           \nReciba un cordial saludo,
-           \nPara mí fue un placer haber atendido su requerimiento, referente al número de crédito ${session.userData.datosCreditoUsuario.nro_cuenta}.\nSegún la conversación previa se llegó a un nuevo acuerdo de pago con las siguientes condiciones:
-           \nValor de la cuota: ${moneda.cambioMoneda(session.userData.nuevoValorCuota)}\nNúmero de cuotas: ${session.userData.nuevoNroCuotas} cuotas mensuales\n\nEsta información será previamente analizada por uno de nuestros asesores que se contactará con usted para oficializar el nuevo acuerdo.
-           \n\nAtentamente,
-           \nBANWERC\nAsesor virtual.
-           `;
-        let correo = session.userData.datosUsuario.email;
-        let asunto = `Solicitud acuerdo de pago`;
+        //Llamado al método para aumentar la secuencia del número de solicitud
+        connect.actualizarSecuencia(
 
-        //Enviar correo
-        email.enviarEmail(correo, asunto, contenido);
+          //callback para obtener el numero de solicitud
+          nroSolicitud => {
+
+             //Guardamos el objeto con los datos de la solicitud
+            let datosSolicitud =
+              {
+              "numeroSolicitud" :"RC-0"+ nroSolicitud,
+              "datosUsuario": session.userData.datosUsuario,
+              "datosCreditoActual": session.userData.datosCreditoUsuario,
+              "nuevaCuota": session.userData.nuevoValorCuota,
+              "nuevoNroCuotas": session.userData.nuevoNroCuotas,
+              "tipoAcuerdo": "Acuerdo por capacidad de pago",
+              "Estado": "Solicitada",
+              "FechaSolicitud": session.userData.fechaActual,
+              "observaciones": ""
+              };
+
+               //llamamos el metodo para insertar la informacion del usuario, credito y el nuevo acuerdo
+              connect.insertarSolicitud(datosSolicitud);
+              //Actualiza el campo solicitudpendiente del credito
+              let cuenta_id = result._id;
+              let nuevosValores = {$set:{"solicitudesPendientes":"y"}};
+              connect.actualizarCreditoUsuario(cuenta_id,nuevosValores)
 
 
-        //Guardamos el objeto con los datos de la solicitud
-        let datosSolicitud = {
-          "datosUsuario": session.userData.datosUsuario,
-          "datosCreditoActual": session.userData.datosCreditoUsuario,
-          "nuevaCuota": session.userData.nuevoValorCuota,
-          "nuevoNroCuotas": session.userData.nuevoNroCuotas,
-          "tipoAcuerdo": "Acuerdo por capacidad de pago",
-          "Estado": "Solicitada",
-          "FechaSolicitud": session.userData.fechaActual,
-          "observaciones": ""
-        };
+              let contenido = `Sr(a) ${session.userData.datosUsuario.nombres}.
+             \nReciba un cordial saludo,
+             \nPara mí fue un placer haber atendido su requerimiento, referente al número de crédito ${session.userData.datosCreditoUsuario.nro_cuenta}.\nSegún la conversación previa se llegó a un nuevo acuerdo de pago con las siguientes condiciones:
+             \nValor de la cuota: ${moneda.cambioMoneda(session.userData.nuevoValorCuota)}\nNúmero de cuotas: ${session.userData.nuevoNroCuotas} cuotas mensuales\n\nEsta información será previamente analizada por uno de nuestros asesores que se contactará con usted para oficializar el nuevo acuerdo.
+             \n\nAtentamente,
+             \nBANWERC\nAsesor virtual.
+             `;
+              let correo = session.userData.datosUsuario.email;
+              let asunto = `Solicitud acuerdo de pago # RC-0${nroSolicitud}`;
 
-        //llamamos el metodo para insertar la informacion del usuario, credito y el nuevo acuerdo
-        connect.insertarSolicitud(datosSolicitud)
+              //Enviar correo
+              email.enviarEmail(correo, asunto, contenido);
 
-        //Actualiza el campo solicitudpendiente del credito
-        let cuenta_id = result._id;
-        let nuevosValores = {$set:{"solicitudesPendientes":"y"}};
-        connect.actualizarCreditoUsuario(cuenta_id,nuevosValores)
+             }
+
+        );
+
+
 
       });
 
@@ -828,38 +850,52 @@ conversation.message(payload, function(err, response) {
         connect.buscarCreditoxCedula(documento, result => {
         session.userData.datosCreditoUsario = result;
 
+        //Llamada al metodo para autoincrementar la secuencia y crear el numero de solicitud
+        connect.actualizarSecuencia(
 
-        let contenido = `Sr(a) ${session.userData.datosUsuario.nombres}.
+          //Callback para obtener el numero de secuencia creada
+          nroSolicitud =>{
+
+            //Guardamos el objeto con los datos de la solicitud
+            let datosSolicitud =
+                {
+                "numeroSolicitud": "RC-0" + nroSolicitud,
+                "datosUsuario": session.userData.datosUsuario,
+                "datosCreditoActual": session.userData.datosCreditoUsario,
+                "nuevaCuota": session.userData.nuevoValorCuota,
+                "nuevoNroCuotas": session.userData.nuevoNroCuotas,
+                "tipoAcuerdo": "Acuerdo por número de cuotas",
+                "Estado": "Solicitada",
+                "FechaSolicitud": session.userData.fechaActual,
+                "observaciones": ""
+              };
+
+            //llamamos el metodo para insertar la informacion del usuario, credito y el nuevo acuerdo
+            connect.insertarSolicitud(datosSolicitud);
+            //Actualiza el campo solicitudpendiente del credito
+            let cuenta_id = result._id;
+            let nuevosValores = {$set:{"solicitudesPendientes":"y"}};
+            connect.actualizarCreditoUsuario(cuenta_id,nuevosValores)
+            let contenido = `Sr(a) ${session.userData.datosUsuario.nombres}.
            \nReciba un cordial saludo,
            \nPara mí fue un placer haber atendido su requerimiento, referente al número de crédito ${session.userData.datosCreditoUsario.nro_cuenta}.\nSegún la conversación previa se llegó a un nuevo acuerdo de pago con las siguientes condiciones:
            \nValor de la cuota: ${moneda.cambioMoneda(session.userData.nuevoValorCuota)}\nNúmero de cuotas: ${session.userData.nuevoNroCuotas} cuotas mensuales\n\nEsta información será previamente analizada por uno de nuestros asesores que se contactará con usted para oficializar el nuevo acuerdo.
            \n\nAtentamente,
            \nBANWERC\nAsesor virtual.
            `;
-        let correo = session.userData.datosUsuario.email;
-        let asunto = `Solicitud acuerdo de pago`;
+            let correo = session.userData.datosUsuario.email;
+            let asunto = `Solicitud acuerdo de pago # RC-0${nroSolicitud}`;
 
-        //Enviar correo
-        email.enviarEmail(correo, asunto, contenido);
-          //Guardamos el objeto con los datos de la solicitud
-          let datosSolicitud = {
-            "datosUsuario": session.userData.datosUsuario,
-            "datosCreditoActual": session.userData.datosCreditoUsario,
-            "nuevaCuota": session.userData.nuevoValorCuota,
-            "nuevoNroCuotas": session.userData.nuevoNroCuotas,
-            "tipoAcuerdo": "Acuerdo por número de cuotas",
-            "Estado": "Solicitada",
-            "FechaSolicitud": session.userData.fechaActual,
-            "observaciones": ""
-          };
+            //Enviar correo
+            email.enviarEmail(correo, asunto, contenido);
+          }
 
-          //llamamos el metodo para insertar la informacion del usuario, credito y el nuevo acuerdo
-          connect.insertarSolicitud(datosSolicitud)
+        )
 
-          //Actualiza el campo solicitudpendiente del credito
-          let cuenta_id = result._id;
-          let nuevosValores = {$set:{"solicitudesPendientes":"y"}};
-          connect.actualizarCreditoUsuario(cuenta_id,nuevosValores)
+
+
+
+
       })
 
 

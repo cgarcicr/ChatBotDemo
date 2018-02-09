@@ -24,6 +24,7 @@
     <!-- Tabla con el listado de solicitudes  -->
     <table class="table table-striped tableModal table-sm"  >
       <thead >
+        <th>Nro. Solicitud</th>
         <th>Fecha Solicitud</th>
         <th>Nombre Cliente</th>
         <th>Apellido Cliente</th>
@@ -36,6 +37,7 @@
         <% for(var i=0; i<solicitud.length; i++) {%>
 
           <tr>
+            <td><%= solicitud[i].numeroSolicitud %></td>
             <td><%= solicitud[i].FechaSolicitud %></td>
             <td><%= solicitud[i].datosUsuario.nombres %></td>
             <td><%= solicitud[i].datosUsuario.apellidos %></td>
